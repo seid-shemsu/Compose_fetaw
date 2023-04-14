@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Icon
 import androidx.compose.material.Scaffold
@@ -23,7 +24,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.fragment.app.Fragment
+import com.google.firebase.auth.FirebaseAuth
 import com.seid.fetawa_.R
 import com.seid.fetawa_.utils.SPUtils
 
@@ -92,31 +95,44 @@ class ProfileFragment : Fragment() {
                             icon = R.drawable.ic_baseline_phone_24,
                             title = "Phone Number",
                             value = SPUtils.getPhone(context)
-                        )
+                        ) {
+
+                        }
 
                         RowElement(
                             icon = R.drawable.ic_baseline_mail_24,
                             title = "Email",
                             value = SPUtils.getEmail(context)
-                        )
+                        ) {
+
+                        }
 
                         RowElement(
                             icon = R.drawable.ic_baseline_info_24,
                             title = "About Us",
                             value = null
-                        )
+                        ) {
+
+                        }
 
                         RowElement(
                             icon = R.drawable.ic_baseline_delete_24,
                             title = "Delete Account",
                             value = null
-                        )
+                        ) {
+
+                        }
 
                         RowElement(
                             icon = R.drawable.ic_baseline_exit_to_app_24,
                             title = "Log out",
                             value = null,
-                        )
+                        ) {
+
+                            FirebaseAuth.getInstance().signOut()
+                            SPUtils.signOut(context)
+                            activity?.finish()
+                        }
                     }
                 }
             }
@@ -126,13 +142,14 @@ class ProfileFragment : Fragment() {
 }
 
 @Composable
-fun RowElement(icon: Int, title: String, value: String?) {
+fun RowElement(icon: Int, title: String, value: String?, function: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .height(70.dp)
             .background(Color.White)
-            .padding(horizontal = 25.dp),
+            .padding(horizontal = 25.dp)
+            .clickable { function() },
         verticalAlignment = CenterVertically
     ) {
         Image(

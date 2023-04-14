@@ -35,11 +35,11 @@ class MineViewModel : ViewModel() {
                             try {
                                 list.add(
                                     Question(
-                                        answer = it.child("answer").value as String,
-                                        answered_by = it.child("answered_by").value as String,
-                                        category = it.child("category").value as String,
+                                        answer = it.child("answer").value as String?,
+                                        answered_by = it.child("answered_by").value as String?,
+                                        category = it.child("category").value as String?,
                                         id = it.child("id").value as String,
-                                        posted_date = it.child("posted_date").value as String,
+                                        posted_date = it.child("posted_date").value as String?,
                                         question = it.child("question").value as String,
                                         user = it.child("user").value as String,
                                         status = (it.child("status").value as Long).toInt(),
@@ -49,7 +49,7 @@ class MineViewModel : ViewModel() {
                                 e.printStackTrace()
                             }
                         }
-                        questionsResponse.value = Resource.success(list)
+                        questionsResponse.value = Resource.success(list.reversed())
                     }
 
                     override fun onCancelled(error: DatabaseError) {

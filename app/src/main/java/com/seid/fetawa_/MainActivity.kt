@@ -4,8 +4,11 @@ import android.app.Dialog
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
+import android.util.Log
+import android.view.View
 import android.view.Window
 import android.widget.EditText
+import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -14,8 +17,10 @@ import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
+import com.example.compose_test.models.Question
 import com.google.android.gms.tasks.Task
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.android.material.textfield.TextInputLayout
 import com.google.firebase.FirebaseException
 import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth
@@ -28,7 +33,9 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.seid.fetawa_.databinding.ActivityMainBinding
+import com.seid.fetawa_.models.User
 import com.seid.fetawa_.utils.Constants
+import com.seid.fetawa_.utils.SPUtils
 import java.util.concurrent.TimeUnit
 
 
@@ -37,13 +44,23 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var phone: EditText
     private lateinit var code: EditText
+    private lateinit var name: EditText
+    private lateinit var email: EditText
     private lateinit var send_card: CardView
     private lateinit var cancel_card: CardView
     private lateinit var send_text: TextView
     private lateinit var cancel_text: TextView
+    private lateinit var phone_input: TextInputLayout
+    private lateinit var code_input: TextInputLayout
+    private lateinit var name_input: TextInputLayout
+    private lateinit var email_input: TextInputLayout
+    private lateinit var question_text_input: EditText
+    private lateinit var progress: ProgressBar
+    private lateinit var dialog: Dialog
     private var verificationId: String = ""
     private var mAuth: FirebaseAuth? = null
     private var phone_number = ""
+    private var current_action = "send"
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         supportActionBar?.hide()
@@ -70,29 +87,160 @@ class MainActivity : AppCompatActivity() {
                 /**
                  * QUESTION DIALOG
                  */
+                dialog = Dialog(this)
+                dialog.setCancelable(false)
+                dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+                dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
+                dialog.setContentView(R.layout.ask_dialog)
+                dialog.show()
+                progress = dialog.findViewById(R.id.progress)
+                cancel_card = dialog.findViewById(R.id.cancel_card)
+                cancel_text = dialog.findViewById(R.id.cancel_text)
+                cancel_text.setOnClickListener {
+                    current_action = "send"
+                    dialog.dismiss()
+                }
+                cancel_card.setOnClickListener {
+                    current_action = "send"
+                    dialog.dismiss()
+                }
+
+                send_card = dialog.findViewById(R.id.send_card)
+                send_text = dialog.findViewById(R.id.send_text)
+                question_text_input = dialog.findViewById(R.id.question)
+                send_card.setOnClickListener {
+                    if (question_text_input.text.toString().length > 15) {
+                        sendQuestion(question_text_input.text.toString())
+                    } else {
+                        question_text_input.error = "Use more words."
+                    }
+                }
+                send_text.setOnClickListener {
+                    if (question_text_input.text.toString().length > 15) {
+                        sendQuestion(question_text_input.text.toString())
+                    } else {
+                        question_text_input.error = "Use more words."
+                    }
+                }
+
             } else {
 
                 /**
                  * LOGIN DIALOG
                  */
                 mAuth = FirebaseAuth.getInstance();
-                val dialog = Dialog(this)
+                dialog = Dialog(this)
                 dialog.setCancelable(false)
                 dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
                 dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
                 dialog.setContentView(R.layout.login_dialog)
                 dialog.show()
+                progress = dialog.findViewById(R.id.progress)
+                phone_input = dialog.findViewById(R.id.phone_input)
+                code_input = dialog.findViewById(R.id.code_input)
+                name_input = dialog.findViewById(R.id.name_input)
+                email_input = dialog.findViewById(R.id.email_input)
                 phone = dialog.findViewById(R.id.phone)
                 code = dialog.findViewById(R.id.code)
+                name = dialog.findViewById(R.id.name)
+                email = dialog.findViewById(R.id.email)
                 send_card = dialog.findViewById(R.id.send_code_card)
                 send_text = dialog.findViewById(R.id.send_code_text)
                 cancel_card = dialog.findViewById(R.id.cancel_card)
                 cancel_text = dialog.findViewById(R.id.cancel_text)
-                cancel_text.setOnClickListener { dialog.dismiss() }
-                cancel_card.setOnClickListener { dialog.dismiss() }
-                send_card.setOnClickListener { sendCode() }
-                send_text.setOnClickListener { sendCode() }
+                cancel_text.setOnClickListener {
+                    current_action = "send"
+                    dialog.dismiss()
+                }
+                cancel_card.setOnClickListener {
+                    current_action = "send"
+                    dialog.dismiss()
+                }
+                send_card.setOnClickListener {
+                    when (current_action) {
+                        "send" -> {
+                            Log.e("Action", "Sending")
+                            sendCode()
+                        }
+                        "verify" -> {
+                            Log.e("Action", "Verifying")
+                            verifyCode(code.text.toString())
+                        }
+                        "save" -> {
+                            Log.e("Action", "Saving")
+                            save()
+                        }
+                    }
+                }
+                send_text.setOnClickListener {
+                    when (current_action) {
+                        "send" -> {
+                            Log.e("Action", "Sending")
+                            sendCode()
+                        }
+                        "verify" -> {
+                            Log.e("Action", "Verifying")
+                            verifyCode(code.text.toString())
+                        }
+                        "save" -> {
+                            Log.e("Action", "Saving")
+                            save()
+                        }
+                    }
+                }
             }
+        }
+
+    }
+
+    private fun sendQuestion(q: String) {
+        progressing(true)
+        val id = FirebaseDatabase.getInstance().reference.push().key
+
+        val question =
+            Question(
+                null,
+                null,
+                null,
+                id!!,
+                System.currentTimeMillis().toString(),
+                q,
+                SPUtils.getName(this),
+                0
+            )
+
+        FirebaseDatabase.getInstance().getReference("questions").child(id).setValue(question)
+        FirebaseDatabase.getInstance().getReference("users_questions")
+            .child(SPUtils.getPhone(this))
+            .child(id).setValue(question)
+            .addOnSuccessListener {
+                progressing(false)
+                Toast.makeText(this, "Question asked Successfully", Toast.LENGTH_SHORT).show()
+                dialog.dismiss()
+            }
+    }
+
+    private fun save() {
+        if (!name.text.isNullOrEmpty() || !email.text.isNullOrEmpty()) {
+            progressing(true)
+            val user = User(
+                name.text.toString(),
+                phone_number,
+                email.text.toString()
+            )
+            Log.e("User", "$user")
+            FirebaseDatabase.getInstance().getReference("Users")
+                .child(phone_number)
+                .setValue(user)
+                .addOnSuccessListener {
+                    progressing(false)
+                    Toast.makeText(this, "Login Success", Toast.LENGTH_SHORT).show()
+                    dialog.dismiss()
+                }
+        } else {
+            Log.e("Name", name.text.toString())
+            Log.e("Email", email.text.toString())
+            Toast.makeText(this, "Check your input", Toast.LENGTH_SHORT).show()
         }
 
     }
@@ -100,16 +248,30 @@ class MainActivity : AppCompatActivity() {
     private fun sendCode() {
         var num = phone.text.toString()
         if (checkPhone(num)) {
+            progressing(true)
             if (num.startsWith("0"))
                 num = "+251" + num.substring(1, num.length);
             else if (num.startsWith("251"))
                 num = "+" + num;
+            phone.isEnabled = false
             phone_number = num.substring(1, num.length);
             sendVerificationCode(num)
-            send_text.text = "Sending"
         } else {
             phone.error = "Check Your Input"
         }
+    }
+
+    private fun progressing(value: Boolean) {
+        if (value) {
+            progress.visibility = View.VISIBLE
+            send_text.visibility = View.GONE
+            cancel_card.isEnabled = false
+        } else {
+            progress.visibility = View.GONE
+            send_text.visibility = View.VISIBLE
+        }
+        cancel_card.isEnabled = !value
+        cancel_text.isEnabled = !value
     }
 
     private fun checkPhone(number: String): Boolean {
@@ -124,13 +286,14 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun verifyCode(code: String) {
-        send_text.text = "Verifying"
         try {
+            progressing(true)
             val credential = PhoneAuthProvider.getCredential(verificationId, code)
             signInWithCredential(credential)
         } catch (e: Exception) {
             e.printStackTrace()
             this.code.setError("Invalid code...")
+            progressing(false)
             send_text.text = "Verify"
         }
     }
@@ -144,13 +307,27 @@ class MainActivity : AppCompatActivity() {
                             override fun onDataChange(snapshot: DataSnapshot) {
                                 val sp = getSharedPreferences(Constants.SP_USER, MODE_PRIVATE)
                                 if (!snapshot.hasChild("phone")) {
-                                    FirebaseDatabase.getInstance().getReference("Users")
-                                        .child(phone_number)
-                                        .child("phone").setValue(phone_number)
+                                    progressing(false)
+                                    send_text.text = "Save"
+                                    phone_input.visibility = View.GONE
+                                    code_input.visibility = View.GONE
+                                    name_input.visibility = View.VISIBLE
+                                    email_input.visibility = View.VISIBLE
+                                    current_action = "save"
                                 } else {
-                                    sp.edit().putBoolean("auth", true)
-                                        .putString("phone", phone_number)
+                                    sp.edit()
+                                        .putBoolean("auth", true)
+                                        .putString(
+                                            "phone",
+                                            snapshot.child("phone").value as String?
+                                        )
+                                        .putString(
+                                            "email",
+                                            snapshot.child("email").value as String?
+                                        )
+                                        .putString("name", snapshot.child("name").value as String?)
                                         .apply()
+                                    dialog.dismiss()
                                 }
                             }
 
@@ -160,6 +337,7 @@ class MainActivity : AppCompatActivity() {
                     if (task.exception!!.message!!.contains("invalid")) {
                         code.setError("Invalid code...")
                         send_text.text = "Verify"
+                        progressing(false)
                     }
                 }
             }
@@ -183,6 +361,9 @@ class MainActivity : AppCompatActivity() {
                 verificationId = s
                 code.isEnabled = true
                 send_text.text = "Verify"
+                current_action = "verify"
+                progressing(false)
+                Log.e("State", "*************************************************")
             }
 
             override fun onVerificationCompleted(phoneAuthCredential: PhoneAuthCredential) {
@@ -195,6 +376,7 @@ class MainActivity : AppCompatActivity() {
 
             override fun onVerificationFailed(e: FirebaseException) {
                 Toast.makeText(this@MainActivity, e.message, Toast.LENGTH_LONG).show()
+                send_text.text = "Send Code"
             }
         }
 }

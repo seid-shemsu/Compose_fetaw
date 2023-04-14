@@ -34,24 +34,28 @@ fun MyQuestion(question: Question) {
             .background(blue)
     ) {
         Column(horizontalAlignment = Alignment.Start) {
-            Row(
-                modifier = Modifier
-                    .padding(horizontal = 10.dp, vertical = 15.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    Icons.Outlined.LocationOn,
-                    "",
-                    tint = Color.White
-                )
-                Spacer(modifier = Modifier.width(5.dp))
-                Text(
-                    (question.category
-                        ?: ""),
-                    color = Color.White,
-                    fontWeight = FontWeight.Medium
-                )
-            }
+            if (question.category != null) {
+                Row(
+                    modifier = Modifier
+                        .padding(horizontal = 10.dp, vertical = 15.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        Icons.Outlined.LocationOn,
+                        "",
+                        tint = Color.White
+                    )
+                    Spacer(modifier = Modifier.width(5.dp))
+                    Text(
+                        question.category,
+                        color = Color.White,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+            } else
+                Spacer(modifier = Modifier
+                    .padding(horizontal = 10.dp, vertical = 15.dp))
+
             Text(
                 question.question,
                 color = Color.White,
