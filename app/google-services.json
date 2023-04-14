@@ -1,0 +1,164 @@
+{
+  "project_info": {
+    "project_number": "2390845530",
+    "firebase_url": "https://nesiha-fetawa.firebaseio.com",
+    "project_id": "nesiha-fetawa",
+    "storage_bucket": "nesiha-fetawa.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:2390845530:android:fcde33aecaa33300341063",
+        "android_client_info": {
+          "package_name": "com.example.compose_test"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "2390845530-qm8ag841dmo2e0ku0vthelckthbuk0lj.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDNge5msnFeG0WMkLzNkdRVraA-y1h7l2o"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "2390845530-qm8ag841dmo2e0ku0vthelckthbuk0lj.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:2390845530:android:d81d6869ae0f4940341063",
+        "android_client_info": {
+          "package_name": "com.example.fetawa_flutter"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "2390845530-qm8ag841dmo2e0ku0vthelckthbuk0lj.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDNge5msnFeG0WMkLzNkdRVraA-y1h7l2o"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "2390845530-qm8ag841dmo2e0ku0vthelckthbuk0lj.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:2390845530:android:15289d58a51dd71a341063",
+        "android_client_info": {
+          "package_name": "com.izhar.fetawa"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "2390845530-b61bs4flscosl5btrd53dbs9q29o952o.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.izhar.fetawa",
+            "certificate_hash": "a5c8eca84e93012e296242c0d01212434162227c"
+          }
+        },
+        {
+          "client_id": "2390845530-qm8ag841dmo2e0ku0vthelckthbuk0lj.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDNge5msnFeG0WMkLzNkdRVraA-y1h7l2o"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "2390845530-qm8ag841dmo2e0ku0vthelckthbuk0lj.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:2390845530:android:4c1dfb6a60dd8365341063",
+        "android_client_info": {
+          "package_name": "com.izhar.fetawaadmin"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "2390845530-qm8ag841dmo2e0ku0vthelckthbuk0lj.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDNge5msnFeG0WMkLzNkdRVraA-y1h7l2o"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "2390845530-qm8ag841dmo2e0ku0vthelckthbuk0lj.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:2390845530:android:7bc1f8b725ea11a3341063",
+        "android_client_info": {
+          "package_name": "com.seid.fetawa_"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "2390845530-qm8ag841dmo2e0ku0vthelckthbuk0lj.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDNge5msnFeG0WMkLzNkdRVraA-y1h7l2o"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "2390845530-qm8ag841dmo2e0ku0vthelckthbuk0lj.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
