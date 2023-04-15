@@ -1,10 +1,7 @@
 package com.seid.fetawa_.ui.home
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.example.compose_test.models.Answered
-import com.example.compose_test.models.Question
+import com.seid.fetawa_.models.Question
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase

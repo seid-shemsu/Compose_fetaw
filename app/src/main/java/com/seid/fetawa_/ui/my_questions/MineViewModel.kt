@@ -2,7 +2,7 @@ package com.seid.fetawa_.ui.my_questions
 
 import android.content.Context
 import androidx.lifecycle.ViewModel
-import com.example.compose_test.models.Question
+import com.seid.fetawa_.models.Question
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase

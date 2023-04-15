@@ -4,7 +4,7 @@ import android.content.ContentValues
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
-import com.example.compose_test.models.Question
+import com.seid.fetawa_.models.Question
 
 class DB(context: Context): SQLiteOpenHelper(context, "local_db", null, 1) {
     override fun onCreate(db: SQLiteDatabase?) {

@@ -17,7 +17,7 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
-import com.example.compose_test.models.Question
+import com.seid.fetawa_.models.Question
 import com.seid.fetawa_.db.DB
 import com.seid.fetawa_.ui.components.QuestionComponent
 import com.seid.fetawa_.ui.components.SearchComponent
@@ -71,6 +71,7 @@ class FavFragment : Fragment() {
                                     }
                                 ) {
                                     QuestionComponent(
+                                        context,
                                         question = question,
                                         db = db,
                                         FAV_SCREEN

@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Icon
 import androidx.compose.material.Scaffold
@@ -24,7 +25,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
 import androidx.fragment.app.Fragment
 import com.google.firebase.auth.FirebaseAuth
 import com.seid.fetawa_.R
@@ -64,7 +64,7 @@ class ProfileFragment : Fragment() {
                                 modifier = Modifier.align(Alignment.TopEnd)
                             )
                             Image(
-                                painter = painterResource(id = com.seid.fetawa_.R.drawable.male),
+                                painter = painterResource(id = R.drawable.male),
                                 contentDescription = "",
                                 modifier = Modifier
                                     .size(130.dp)
@@ -76,7 +76,7 @@ class ProfileFragment : Fragment() {
                                 verticalAlignment = CenterVertically
                             ) {
                                 Text(
-                                    SPUtils.getName(context),
+                                    SPUtils.getName(context).replaceFirstChar { it.uppercase() },
                                     fontSize = 30.sp,
                                     color = Color.Black,
                                     fontWeight = FontWeight.Bold
@@ -86,7 +86,7 @@ class ProfileFragment : Fragment() {
                                     painterResource(id = com.seid.fetawa_.R.drawable.edit),
                                     "",
                                     modifier = Modifier
-                                        .size(25.dp)
+                                        .size(22.dp)
                                 )
                             }
                         }
@@ -149,7 +149,10 @@ fun RowElement(icon: Int, title: String, value: String?, function: () -> Unit) {
             .height(70.dp)
             .background(Color.White)
             .padding(horizontal = 25.dp)
-            .clickable { function() },
+            .clickable(
+                interactionSource = MutableInteractionSource(),
+                indication = null
+            ) { function() },
         verticalAlignment = CenterVertically
     ) {
         Image(

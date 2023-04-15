@@ -1,5 +1,7 @@
 package com.seid.fetawa_.ui.components
 
+import android.content.Context
+import android.content.Intent
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
@@ -16,8 +18,6 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.outlined.LocationOn
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -30,15 +30,22 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.compose_test.models.Question
+import com.seid.fetawa_.models.Question
 import com.seid.fetawa_.R
+import com.seid.fetawa_.activities.DetailActivity
 import com.seid.fetawa_.db.DB
 import com.seid.fetawa_.utils.Constants
 import com.seid.fetawa_.utils.Constants.HOME_SCREEN
 import com.seid.fetawa_.utils.DateFormatter
 
 @Composable
-fun QuestionComponent(question: Question, db: DB, screen: String, function: () -> Unit) {
+fun QuestionComponent(
+    context: Context,
+    question: Question,
+    db: DB,
+    screen: String,
+    function: () -> Unit
+) {
     val favorite = remember { mutableStateOf(db.isFav(question.id)) }
     Spacer(modifier = Modifier.height(10.dp))
     Box(
@@ -177,7 +184,12 @@ fun QuestionComponent(question: Question, db: DB, screen: String, function: () -
                 .height(50.dp)
                 .clip(RoundedCornerShape(100.dp))
                 .background(Color.Black)
-                .align(Alignment.TopEnd),
+                .align(Alignment.TopEnd)
+                .clickable {
+                    var intent = Intent(context, DetailActivity::class.java)
+                    intent.putExtra("object", question)
+                    context.startActivity(intent)
+                },
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center
         ) {

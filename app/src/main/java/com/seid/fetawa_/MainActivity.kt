@@ -17,7 +17,6 @@ import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
-import com.example.compose_test.models.Question
 import com.google.android.gms.tasks.Task
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.textfield.TextInputLayout
@@ -33,6 +32,7 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.seid.fetawa_.databinding.ActivityMainBinding
+import com.seid.fetawa_.models.Question
 import com.seid.fetawa_.models.User
 import com.seid.fetawa_.utils.Constants
 import com.seid.fetawa_.utils.SPUtils
@@ -87,110 +87,117 @@ class MainActivity : AppCompatActivity() {
                 /**
                  * QUESTION DIALOG
                  */
-                dialog = Dialog(this)
-                dialog.setCancelable(false)
-                dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-                dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
-                dialog.setContentView(R.layout.ask_dialog)
-                dialog.show()
-                progress = dialog.findViewById(R.id.progress)
-                cancel_card = dialog.findViewById(R.id.cancel_card)
-                cancel_text = dialog.findViewById(R.id.cancel_text)
-                cancel_text.setOnClickListener {
-                    current_action = "send"
-                    dialog.dismiss()
-                }
-                cancel_card.setOnClickListener {
-                    current_action = "send"
-                    dialog.dismiss()
-                }
-
-                send_card = dialog.findViewById(R.id.send_card)
-                send_text = dialog.findViewById(R.id.send_text)
-                question_text_input = dialog.findViewById(R.id.question)
-                send_card.setOnClickListener {
-                    if (question_text_input.text.toString().length > 15) {
-                        sendQuestion(question_text_input.text.toString())
-                    } else {
-                        question_text_input.error = "Use more words."
-                    }
-                }
-                send_text.setOnClickListener {
-                    if (question_text_input.text.toString().length > 15) {
-                        sendQuestion(question_text_input.text.toString())
-                    } else {
-                        question_text_input.error = "Use more words."
-                    }
-                }
-
+                ask()
             } else {
 
                 /**
                  * LOGIN DIALOG
                  */
-                mAuth = FirebaseAuth.getInstance();
-                dialog = Dialog(this)
-                dialog.setCancelable(false)
-                dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-                dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
-                dialog.setContentView(R.layout.login_dialog)
-                dialog.show()
-                progress = dialog.findViewById(R.id.progress)
-                phone_input = dialog.findViewById(R.id.phone_input)
-                code_input = dialog.findViewById(R.id.code_input)
-                name_input = dialog.findViewById(R.id.name_input)
-                email_input = dialog.findViewById(R.id.email_input)
-                phone = dialog.findViewById(R.id.phone)
-                code = dialog.findViewById(R.id.code)
-                name = dialog.findViewById(R.id.name)
-                email = dialog.findViewById(R.id.email)
-                send_card = dialog.findViewById(R.id.send_code_card)
-                send_text = dialog.findViewById(R.id.send_code_text)
-                cancel_card = dialog.findViewById(R.id.cancel_card)
-                cancel_text = dialog.findViewById(R.id.cancel_text)
-                cancel_text.setOnClickListener {
-                    current_action = "send"
-                    dialog.dismiss()
-                }
-                cancel_card.setOnClickListener {
-                    current_action = "send"
-                    dialog.dismiss()
-                }
-                send_card.setOnClickListener {
-                    when (current_action) {
-                        "send" -> {
-                            Log.e("Action", "Sending")
-                            sendCode()
-                        }
-                        "verify" -> {
-                            Log.e("Action", "Verifying")
-                            verifyCode(code.text.toString())
-                        }
-                        "save" -> {
-                            Log.e("Action", "Saving")
-                            save()
-                        }
-                    }
-                }
-                send_text.setOnClickListener {
-                    when (current_action) {
-                        "send" -> {
-                            Log.e("Action", "Sending")
-                            sendCode()
-                        }
-                        "verify" -> {
-                            Log.e("Action", "Verifying")
-                            verifyCode(code.text.toString())
-                        }
-                        "save" -> {
-                            Log.e("Action", "Saving")
-                            save()
-                        }
-                    }
-                }
+                login()
+            }
+        }
+    }
+
+    private fun ask() {
+        dialog = Dialog(this)
+        dialog.setCancelable(false)
+        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
+        dialog.setContentView(R.layout.ask_dialog)
+        dialog.show()
+        progress = dialog.findViewById(R.id.progress)
+        cancel_card = dialog.findViewById(R.id.cancel_card)
+        cancel_text = dialog.findViewById(R.id.cancel_text)
+        cancel_text.setOnClickListener {
+            current_action = "send"
+            dialog.dismiss()
+        }
+        cancel_card.setOnClickListener {
+            current_action = "send"
+            dialog.dismiss()
+        }
+
+        send_card = dialog.findViewById(R.id.send_card)
+        send_text = dialog.findViewById(R.id.send_text)
+        question_text_input = dialog.findViewById(R.id.question)
+        send_card.setOnClickListener {
+            if (question_text_input.text.toString().length > 15) {
+                sendQuestion(question_text_input.text.toString())
+            } else {
+                question_text_input.error = "Use more words."
+            }
+        }
+        send_text.setOnClickListener {
+            if (question_text_input.text.toString().length > 15) {
+                sendQuestion(question_text_input.text.toString())
+            } else {
+                question_text_input.error = "Use more words."
             }
         }
 
+    }
+
+    private fun login() {
+        mAuth = FirebaseAuth.getInstance();
+        dialog = Dialog(this)
+        dialog.setCancelable(false)
+        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
+        dialog.setContentView(R.layout.login_dialog)
+        dialog.show()
+        progress = dialog.findViewById(R.id.progress)
+        phone_input = dialog.findViewById(R.id.phone_input)
+        code_input = dialog.findViewById(R.id.code_input)
+        name_input = dialog.findViewById(R.id.name_input)
+        email_input = dialog.findViewById(R.id.email_input)
+        phone = dialog.findViewById(R.id.phone)
+        code = dialog.findViewById(R.id.code)
+        name = dialog.findViewById(R.id.name)
+        email = dialog.findViewById(R.id.email)
+        send_card = dialog.findViewById(R.id.send_code_card)
+        send_text = dialog.findViewById(R.id.send_code_text)
+        cancel_card = dialog.findViewById(R.id.cancel_card)
+        cancel_text = dialog.findViewById(R.id.cancel_text)
+        cancel_text.setOnClickListener {
+            current_action = "send"
+            dialog.dismiss()
+        }
+        cancel_card.setOnClickListener {
+            current_action = "send"
+            dialog.dismiss()
+        }
+        send_card.setOnClickListener {
+            when (current_action) {
+                "send" -> {
+                    Log.e("Action", "Sending")
+                    sendCode()
+                }
+                "verify" -> {
+                    Log.e("Action", "Verifying")
+                    verifyCode(code.text.toString())
+                }
+                "save" -> {
+                    Log.e("Action", "Saving")
+                    save()
+                }
+            }
+        }
+        send_text.setOnClickListener {
+            when (current_action) {
+                "send" -> {
+                    Log.e("Action", "Sending")
+                    sendCode()
+                }
+                "verify" -> {
+                    Log.e("Action", "Verifying")
+                    verifyCode(code.text.toString())
+                }
+                "save" -> {
+                    Log.e("Action", "Saving")
+                    save()
+                }
+            }
+        }
     }
 
     private fun sendQuestion(q: String) {
@@ -236,6 +243,7 @@ class MainActivity : AppCompatActivity() {
                     progressing(false)
                     Toast.makeText(this, "Login Success", Toast.LENGTH_SHORT).show()
                     dialog.dismiss()
+                    ask()
                 }
         } else {
             Log.e("Name", name.text.toString())
@@ -275,6 +283,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun checkPhone(number: String): Boolean {
+        if (number.length < 10)
+            return false
         if (number.startsWith("0")) {
             if (number.length != 10) return false
         }
@@ -328,6 +338,7 @@ class MainActivity : AppCompatActivity() {
                                         .putString("name", snapshot.child("name").value as String?)
                                         .apply()
                                     dialog.dismiss()
+                                    ask()
                                 }
                             }
 
@@ -359,11 +370,10 @@ class MainActivity : AppCompatActivity() {
                 super.onCodeSent(s, forceResendingToken)
                 code.requestFocus()
                 verificationId = s
-                code.isEnabled = true
+                code_input.isEnabled = true
                 send_text.text = "Verify"
                 current_action = "verify"
                 progressing(false)
-                Log.e("State", "*************************************************")
             }
 
             override fun onVerificationCompleted(phoneAuthCredential: PhoneAuthCredential) {
@@ -377,6 +387,8 @@ class MainActivity : AppCompatActivity() {
             override fun onVerificationFailed(e: FirebaseException) {
                 Toast.makeText(this@MainActivity, e.message, Toast.LENGTH_LONG).show()
                 send_text.text = "Send Code"
+                code_input.isEnabled = false
+                progressing(false)
             }
         }
 }

@@ -1,4 +1,4 @@
-package com.example.compose_test.models
+package com.seid.fetawa_.models
 
 data class Question(
     val answer: String?,
@@ -9,4 +9,4 @@ data class Question(
     val question: String,
     val user: String? = null,
     val status: Int = 0,
-)
+) : java.io.Serializable

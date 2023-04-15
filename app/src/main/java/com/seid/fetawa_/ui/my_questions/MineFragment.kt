@@ -27,8 +27,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
-import com.example.compose_test.models.Question
-import com.seid.fetawa_.db.DB
+import com.seid.fetawa_.models.Question
 import com.seid.fetawa_.ui.components.*
 import com.seid.fetawa_.utils.AnimatedShimmer
 import com.seid.fetawa_.utils.Constants

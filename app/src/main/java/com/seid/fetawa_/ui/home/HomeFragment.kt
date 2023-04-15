@@ -30,7 +30,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import com.example.compose_test.models.Question
+import com.seid.fetawa_.models.Question
 import com.seid.fetawa_.db.DB
 import com.seid.fetawa_.ui.components.Greeting
 import com.seid.fetawa_.ui.components.QuestionComponent
@@ -223,6 +223,7 @@ class HomeFragment : Fragment() {
                                     LazyColumn(content = {
                                         items(questions.size) { index ->
                                             QuestionComponent(
+                                                context = context,
                                                 question = questions[index],
                                                 db = db,
                                                 HOME_SCREEN

@@ -19,7 +19,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.compose_test.models.Question
+import com.seid.fetawa_.models.Question
 import com.seid.fetawa_.R
 import com.seid.fetawa_.utils.Constants
 import com.seid.fetawa_.utils.Constants.blue

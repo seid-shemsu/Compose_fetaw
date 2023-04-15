@@ -61,6 +61,7 @@
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="20dp"
             android:layout_marginTop="15dp"
+            android:enabled="false"
             android:hint="code"
             app:startIconDrawable="@drawable/ic_baseline_dialpad_24"
             app:startIconTint="@color/blue">
@@ -69,7 +70,6 @@
                 android:id="@+id/code"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:enabled="false"
                 android:inputType="number"
                 android:textColor="@color/black"
                 android:textColorHint="@color/light_gray" />
@@ -124,9 +124,9 @@
             android:layout_height="60dp"
             android:layout_marginHorizontal="20dp"
             android:layout_marginTop="35dp"
-            app:cardElevation="10dp"
             app:cardBackgroundColor="@color/blue"
-            app:cardCornerRadius="7dp">
+            app:cardCornerRadius="7dp"
+            app:cardElevation="10dp">
 
             <RelativeLayout
                 android:layout_width="wrap_content"
@@ -162,9 +162,9 @@
             android:layout_height="60dp"
             android:layout_marginHorizontal="20dp"
             android:layout_marginVertical="15dp"
-            app:cardElevation="10dp"
             app:cardBackgroundColor="@color/white"
-            app:cardCornerRadius="7dp">
+            app:cardCornerRadius="7dp"
+            app:cardElevation="10dp">
 
             <TextView
                 android:id="@+id/cancel_text"
