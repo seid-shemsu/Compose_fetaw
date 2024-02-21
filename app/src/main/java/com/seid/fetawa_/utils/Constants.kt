@@ -14,4 +14,7 @@ object Constants {
     const val HOME_SCREEN = "home_screen"
     const val FAV_SCREEN = "fav_screen"
     const val MINE_SCREEN = "mine_screen"
+
+
+    const val VERSION = "1.0.0"
 }

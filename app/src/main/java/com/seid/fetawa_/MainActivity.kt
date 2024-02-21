@@ -17,6 +17,7 @@ import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
+import com.google.android.gms.ads.MobileAds
 import com.google.android.gms.tasks.Task
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.textfield.TextInputLayout
@@ -31,29 +32,25 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import com.seid.fetawa_.admob.AdMob
 import com.seid.fetawa_.databinding.ActivityMainBinding
 import com.seid.fetawa_.models.Question
 import com.seid.fetawa_.models.User
 import com.seid.fetawa_.utils.Constants
 import com.seid.fetawa_.utils.SPUtils
+import com.seid.fetawa_.utils.Utils
 import java.util.concurrent.TimeUnit
 
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
-    private lateinit var phone: EditText
-    private lateinit var code: EditText
     private lateinit var name: EditText
-    private lateinit var email: EditText
     private lateinit var send_card: CardView
     private lateinit var cancel_card: CardView
     private lateinit var send_text: TextView
     private lateinit var cancel_text: TextView
-    private lateinit var phone_input: TextInputLayout
-    private lateinit var code_input: TextInputLayout
     private lateinit var name_input: TextInputLayout
-    private lateinit var email_input: TextInputLayout
     private lateinit var question_text_input: EditText
     private lateinit var progress: ProgressBar
     private lateinit var dialog: Dialog
@@ -66,7 +63,8 @@ class MainActivity : AppCompatActivity() {
         supportActionBar?.hide()
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
+        MobileAds.initialize(this)
+        AdMob.getInstance(this)
         val navView: BottomNavigationView = binding.navView
 
         val navController = findNavController(R.id.nav_host_fragment)
@@ -96,6 +94,32 @@ class MainActivity : AppCompatActivity() {
                 login()
             }
         }
+        checkUpdate()
+    }
+
+    private fun checkUpdate() {
+        FirebaseDatabase.getInstance().getReference("version")
+            .addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    val value = snapshot.child("version").value as String
+                    if (Utils.compareVersion(value, Constants.VERSION)) {
+                        dialog = Dialog(this@MainActivity)
+                        dialog.setCancelable(false)
+                        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+                        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
+                        dialog.setContentView(R.layout.update_dialog)
+                        dialog.show()
+                        dialog.findViewById<CardView>(R.id.update_card).setOnClickListener {
+
+                        }
+                    }
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+
+                }
+
+            })
     }
 
     private fun ask() {
@@ -138,7 +162,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun login() {
-        mAuth = FirebaseAuth.getInstance();
         dialog = Dialog(this)
         dialog.setCancelable(false)
         dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
@@ -146,57 +169,17 @@ class MainActivity : AppCompatActivity() {
         dialog.setContentView(R.layout.login_dialog)
         dialog.show()
         progress = dialog.findViewById(R.id.progress)
-        phone_input = dialog.findViewById(R.id.phone_input)
-        code_input = dialog.findViewById(R.id.code_input)
         name_input = dialog.findViewById(R.id.name_input)
-        email_input = dialog.findViewById(R.id.email_input)
-        phone = dialog.findViewById(R.id.phone)
-        code = dialog.findViewById(R.id.code)
         name = dialog.findViewById(R.id.name)
-        email = dialog.findViewById(R.id.email)
         send_card = dialog.findViewById(R.id.send_code_card)
         send_text = dialog.findViewById(R.id.send_code_text)
         cancel_card = dialog.findViewById(R.id.cancel_card)
         cancel_text = dialog.findViewById(R.id.cancel_text)
-        cancel_text.setOnClickListener {
-            current_action = "send"
-            dialog.dismiss()
-        }
         cancel_card.setOnClickListener {
-            current_action = "send"
             dialog.dismiss()
         }
         send_card.setOnClickListener {
-            when (current_action) {
-                "send" -> {
-                    Log.e("Action", "Sending")
-                    sendCode()
-                }
-                "verify" -> {
-                    Log.e("Action", "Verifying")
-                    verifyCode(code.text.toString())
-                }
-                "save" -> {
-                    Log.e("Action", "Saving")
-                    save()
-                }
-            }
-        }
-        send_text.setOnClickListener {
-            when (current_action) {
-                "send" -> {
-                    Log.e("Action", "Sending")
-                    sendCode()
-                }
-                "verify" -> {
-                    Log.e("Action", "Verifying")
-                    verifyCode(code.text.toString())
-                }
-                "save" -> {
-                    Log.e("Action", "Saving")
-                    save()
-                }
-            }
+            save()
         }
     }
 
@@ -228,12 +211,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun save() {
-        if (!name.text.isNullOrEmpty() || !email.text.isNullOrEmpty()) {
+        if (!name.text.isNullOrEmpty()) {
             progressing(true)
             val user = User(
-                name.text.toString(),
-                phone_number,
-                email.text.toString()
+                name.text.toString()
             )
             Log.e("User", "$user")
             FirebaseDatabase.getInstance().getReference("Users")
