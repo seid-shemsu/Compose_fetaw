@@ -70,6 +70,9 @@ class DetailActivity : ComponentActivity() {
     lateinit var current_time: MutableState<Int>
     lateinit var progress: MutableState<Int>
     lateinit var category: String
+
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         question = intent.extras?.getSerializable("object") as Question
