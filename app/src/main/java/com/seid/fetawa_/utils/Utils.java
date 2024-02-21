@@ -33,4 +33,22 @@ public class Utils {
             if (mediaPlayer.isPlaying())
                 mediaPlayer.pause();
     }
+    public static boolean compareVersion(String str, String str2) {
+        String[] split = str.split("\\.");
+        String[] split2 = str2.split("\\.");
+        int max = Math.max(split.length, split2.length);
+        int i = 0;
+        while (i < max) {
+            int parseInt = i < split.length ? Integer.parseInt(split[i]) : 0;
+            int parseInt2 = i < split2.length ? Integer.parseInt(split2[i]) : 0;
+            if (parseInt == parseInt2) {
+                i++;
+            } else if (parseInt > parseInt2) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+        return false;
+    }
 }

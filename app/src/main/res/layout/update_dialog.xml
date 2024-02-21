@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:minWidth="350.0dip"
+    android:padding="15.0dip"
+    app:cardBackgroundColor="@color/white"
+    app:cardCornerRadius="15.0dip">
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="5.0dip"
+        android:layout_marginTop="20.0sp"
+        android:layout_marginRight="5.0dip"
+        android:layout_marginBottom="20.0sp"
+        android:background="@color/white"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/update_title"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20.0dip"
+            android:layout_marginTop="10.0dip"
+            android:text="Update Required"
+            android:textAlignment="center"
+            android:textColor="@color/black"
+            android:textSize="25.0sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/update_content"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="20.0dip"
+            android:text="Attention all users! A new update for our mobile app is now available. Please update to the latest version to ensure optimal performance and to access new features. This is a mandatory update and failure to do so may result in the app not functioning properly. Thank you for your cooperation."
+            android:textAlignment="center"
+            android:textColor="@color/black"
+            android:textSize="20.0sp" />
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/update_card"
+            android:layout_width="fill_parent"
+            android:layout_height="60.0dip"
+            android:layout_margin="20.0dip"
+            android:layout_marginTop="35.0dip"
+            app:cardBackgroundColor="@color/blue"
+            app:cardCornerRadius="7.0dip"
+            app:cardElevation="10.0dip">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:layout_gravity="center"
+                android:text="Update"
+                android:textAllCaps="false"
+                android:textColor="@color/white"
+                android:textSize="18.0sp"
+                android:textStyle="bold" />
+        </androidx.cardview.widget.CardView>
+    </LinearLayout>
+</androidx.cardview.widget.CardView>

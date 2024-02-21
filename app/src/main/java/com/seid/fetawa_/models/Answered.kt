@@ -1,4 +1,4 @@
-package com.example.compose_test.models
+package com.seid.fetawa_.models
 
 data class Answered(
     val question: String,
