@@ -34,11 +34,12 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.seid.fetawa_.admob.AdMob
 import com.seid.fetawa_.databinding.ActivityMainBinding
+import com.seid.fetawa_.db.DB
 import com.seid.fetawa_.models.Question
 import com.seid.fetawa_.models.User
 import com.seid.fetawa_.utils.Constants
-import com.seid.fetawa_.utils.SPUtils
 import com.seid.fetawa_.utils.Utils
+import java.util.UUID
 import java.util.concurrent.TimeUnit
 
 
@@ -58,11 +59,17 @@ class MainActivity : AppCompatActivity() {
     private var mAuth: FirebaseAuth? = null
     private var phone_number = ""
     private var current_action = "send"
+    private var user = User()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         supportActionBar?.hide()
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        Thread {
+            user = DB(this).dbDao().getUser() ?: User()
+            Log.e("TAG", "--------------------------------------------")
+            Log.e("TAG", "$user")
+        }.start()
         MobileAds.initialize(this)
         AdMob.getInstance(this)
         val navView: BottomNavigationView = binding.navView
@@ -81,16 +88,9 @@ class MainActivity : AppCompatActivity() {
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
         binding.fab.setOnClickListener {
-            if (getSharedPreferences("user", MODE_PRIVATE).getBoolean("auth", false)) {
-                /**
-                 * QUESTION DIALOG
-                 */
+            if (user.uuid.isNotEmpty()) {
                 ask()
             } else {
-
-                /**
-                 * LOGIN DIALOG
-                 */
                 login()
             }
         }
@@ -101,6 +101,7 @@ class MainActivity : AppCompatActivity() {
         FirebaseDatabase.getInstance().getReference("version")
             .addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
+                    if (!snapshot.hasChildren()) return
                     val value = snapshot.child("version").value as String
                     if (Utils.compareVersion(value, Constants.VERSION)) {
                         dialog = Dialog(this@MainActivity)
@@ -185,25 +186,16 @@ class MainActivity : AppCompatActivity() {
 
     private fun sendQuestion(q: String) {
         progressing(true)
-        val id = FirebaseDatabase.getInstance().reference.push().key
-
-        val question =
-            Question(
-                null,
-                null,
-                null,
-                id!!,
-                System.currentTimeMillis().toString(),
-                q,
-                SPUtils.getName(this),
-                0
-            )
+        val id =  FirebaseDatabase.getInstance().reference.push().key ?: UUID.randomUUID().toString()
+        val question = Question()
+        question.uuid = id
+        question.askedBy = user
+        question.askedDate = System.currentTimeMillis()
+        question.question = q
 
         FirebaseDatabase.getInstance().getReference("questions").child(id).setValue(question)
-        FirebaseDatabase.getInstance().getReference("users_questions")
-            .child(SPUtils.getPhone(this))
-            .child(id).setValue(question)
-            .addOnSuccessListener {
+        FirebaseDatabase.getInstance().getReference("users_questions").child(user.uuid).child(id)
+            .setValue(question).addOnSuccessListener {
                 progressing(false)
                 Toast.makeText(this, "Question asked Successfully", Toast.LENGTH_SHORT).show()
                 dialog.dismiss()
@@ -213,13 +205,13 @@ class MainActivity : AppCompatActivity() {
     private fun save() {
         if (!name.text.isNullOrEmpty()) {
             progressing(true)
-            val user = User(
-                name.text.toString()
-            )
-            Log.e("User", "$user")
-            FirebaseDatabase.getInstance().getReference("Users")
-                .child(phone_number)
-                .setValue(user)
+            val uuid = UUID.randomUUID().toString()
+            user = User(name = name.text.toString(), uuid = uuid)
+            Thread {
+                DB(this).dbDao().insertUser(user)
+
+            }.start()
+            FirebaseDatabase.getInstance().getReference("Users").child(uuid).setValue(user)
                 .addOnSuccessListener {
                     progressing(false)
                     Toast.makeText(this, "Login Success", Toast.LENGTH_SHORT).show()
@@ -228,13 +220,12 @@ class MainActivity : AppCompatActivity() {
                 }
         } else {
             Log.e("Name", name.text.toString())
-            Log.e("Email", email.text.toString())
             Toast.makeText(this, "Check your input", Toast.LENGTH_SHORT).show()
         }
 
     }
 
-    private fun sendCode() {
+    /*private fun sendCode() {
         var num = phone.text.toString()
         if (checkPhone(num)) {
             progressing(true)
@@ -248,7 +239,7 @@ class MainActivity : AppCompatActivity() {
         } else {
             phone.error = "Check Your Input"
         }
-    }
+    }*/
 
     private fun progressing(value: Boolean) {
         if (value) {
@@ -264,8 +255,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun checkPhone(number: String): Boolean {
-        if (number.length < 10)
-            return false
+        if (number.length < 10) return false
         if (number.startsWith("0")) {
             if (number.length != 10) return false
         }
@@ -283,65 +273,53 @@ class MainActivity : AppCompatActivity() {
             signInWithCredential(credential)
         } catch (e: Exception) {
             e.printStackTrace()
-            this.code.setError("Invalid code...")
+            //this.code.setError("Invalid code...")
             progressing(false)
             send_text.text = "Verify"
         }
     }
 
     private fun signInWithCredential(credential: PhoneAuthCredential) {
-        mAuth!!.signInWithCredential(credential)
-            .addOnCompleteListener { task: Task<AuthResult?> ->
-                if (task.isSuccessful) {
-                    FirebaseDatabase.getInstance().getReference("Users").child(phone_number)
-                        .addValueEventListener(object : ValueEventListener {
-                            override fun onDataChange(snapshot: DataSnapshot) {
-                                val sp = getSharedPreferences(Constants.SP_USER, MODE_PRIVATE)
-                                if (!snapshot.hasChild("phone")) {
-                                    progressing(false)
-                                    send_text.text = "Save"
-                                    phone_input.visibility = View.GONE
-                                    code_input.visibility = View.GONE
-                                    name_input.visibility = View.VISIBLE
-                                    email_input.visibility = View.VISIBLE
-                                    current_action = "save"
-                                } else {
-                                    sp.edit()
-                                        .putBoolean("auth", true)
-                                        .putString(
-                                            "phone",
-                                            snapshot.child("phone").value as String?
-                                        )
-                                        .putString(
-                                            "email",
-                                            snapshot.child("email").value as String?
-                                        )
-                                        .putString("name", snapshot.child("name").value as String?)
-                                        .apply()
-                                    dialog.dismiss()
-                                    ask()
-                                }
+        mAuth!!.signInWithCredential(credential).addOnCompleteListener { task: Task<AuthResult?> ->
+            if (task.isSuccessful) {
+                FirebaseDatabase.getInstance().getReference("Users").child(phone_number)
+                    .addValueEventListener(object : ValueEventListener {
+                        override fun onDataChange(snapshot: DataSnapshot) {
+                            val sp = getSharedPreferences(Constants.SP_USER, MODE_PRIVATE)
+                            if (!snapshot.hasChild("phone")) {
+                                progressing(false)
+                                send_text.text = "Save"
+                                //phone_input.visibility = View.GONE
+                                // code_input.visibility = View.GONE
+                                name_input.visibility = View.VISIBLE
+                                //email_input.visibility = View.VISIBLE
+                                current_action = "save"
+                            } else {
+                                sp.edit().putBoolean("auth", true).putString(
+                                    "phone", snapshot.child("phone").value as String?
+                                ).putString(
+                                    "email", snapshot.child("email").value as String?
+                                ).putString("name", snapshot.child("name").value as String?).apply()
+                                dialog.dismiss()
+                                ask()
                             }
+                        }
 
-                            override fun onCancelled(error: DatabaseError) {}
-                        })
-                } else {
-                    if (task.exception!!.message!!.contains("invalid")) {
-                        code.setError("Invalid code...")
-                        send_text.text = "Verify"
-                        progressing(false)
-                    }
+                        override fun onCancelled(error: DatabaseError) {}
+                    })
+            } else {
+                if (task.exception!!.message!!.contains("invalid")) {
+                    //code.setError("Invalid code...")
+                    send_text.text = "Verify"
+                    progressing(false)
                 }
             }
+        }
     }
 
     private fun sendVerificationCode(number: String) {
         PhoneAuthProvider.getInstance().verifyPhoneNumber(
-            number,
-            60,
-            TimeUnit.SECONDS,
-            this,
-            mCallBack
+            number, 60, TimeUnit.SECONDS, this, mCallBack
         )
     }
 
@@ -349,9 +327,9 @@ class MainActivity : AppCompatActivity() {
         object : OnVerificationStateChangedCallbacks() {
             override fun onCodeSent(s: String, forceResendingToken: ForceResendingToken) {
                 super.onCodeSent(s, forceResendingToken)
-                code.requestFocus()
+                //code.requestFocus()
                 verificationId = s
-                code_input.isEnabled = true
+                //code_input.isEnabled = true
                 send_text.text = "Verify"
                 current_action = "verify"
                 progressing(false)
@@ -360,7 +338,7 @@ class MainActivity : AppCompatActivity() {
             override fun onVerificationCompleted(phoneAuthCredential: PhoneAuthCredential) {
                 val smsCode = phoneAuthCredential.smsCode
                 if (smsCode != null) {
-                    code.setText(smsCode)
+                    //code.setText(smsCode)
                     verifyCode(smsCode)
                 }
             }
@@ -368,7 +346,7 @@ class MainActivity : AppCompatActivity() {
             override fun onVerificationFailed(e: FirebaseException) {
                 Toast.makeText(this@MainActivity, e.message, Toast.LENGTH_LONG).show()
                 send_text.text = "Send Code"
-                code_input.isEnabled = false
+                //code_input.isEnabled = false
                 progressing(false)
             }
         }

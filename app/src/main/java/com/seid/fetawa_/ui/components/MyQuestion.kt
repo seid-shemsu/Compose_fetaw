@@ -1,5 +1,6 @@
 package com.seid.fetawa_.ui.components
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -30,31 +31,27 @@ fun MyQuestion(question: Question) {
     Spacer(modifier = Modifier.height(10.dp))
     Box(
         modifier = Modifier
+            .fillMaxWidth()
             .clip(RoundedCornerShape(20.dp))
             .background(blue)
+            .padding(top = 15.dp)
     ) {
         Column(horizontalAlignment = Alignment.Start) {
-            if (question.category != null) {
+            if (question.category.name.isNotEmpty()) {
+
                 Row(
-                    modifier = Modifier
-                        .padding(horizontal = 10.dp, vertical = 15.dp),
+                    modifier = Modifier.padding(start = 10.dp,end = 10.dp, bottom = 15.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
-                        Icons.Outlined.LocationOn,
-                        "",
-                        tint = Color.White
+                        Icons.Outlined.LocationOn, "", tint = Color.White
                     )
                     Spacer(modifier = Modifier.width(5.dp))
                     Text(
-                        question.category,
-                        color = Color.White,
-                        fontWeight = FontWeight.Medium
+                        question.category.name, color = Color.White, fontWeight = FontWeight.Medium
                     )
                 }
-            } else
-                Spacer(modifier = Modifier
-                    .padding(horizontal = 10.dp, vertical = 15.dp))
+            }
 
             Text(
                 question.question,
@@ -66,27 +63,22 @@ fun MyQuestion(question: Question) {
                 fontWeight = FontWeight.Medium
             )
             Row(
-                modifier = Modifier
-                    .padding(horizontal = 10.dp, vertical = 15.dp),
+                modifier = Modifier.padding(horizontal = 10.dp, vertical = 15.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Image(
                     painter = painterResource(id = R.drawable.history),
                     "",
-                    modifier = Modifier
-                        .size(17.dp),
+                    modifier = Modifier.size(17.dp),
                     colorFilter = ColorFilter.tint(Color.White)
                 )
                 Spacer(modifier = Modifier.width(5.dp))
                 Text(
                     text = "Posted ${
                         DateFormatter.getMoment(
-                            question.posted_date?.toLong()
+                            question.askedDate
                         )
-                    }",
-                    fontWeight = FontWeight.Medium,
-                    fontSize = 14.sp,
-                    color = Constants.white
+                    }", fontWeight = FontWeight.Medium, fontSize = 14.sp, color = Constants.white
                 )
             }
         }

@@ -6,6 +6,9 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import com.seid.fetawa_.models.Category
+import com.seid.fetawa_.models.Teacher
+import com.seid.fetawa_.models.User
 import com.seid.fetawa_.utils.Resource
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -38,18 +41,25 @@ class HomeViewModel : ViewModel() {
                         val list: MutableList<Question> = mutableListOf()
                         snapshot.children.forEach {
                             try {
-                                list.add(
-                                    Question(
-                                        answer = it.child("answer").value as String,
-                                        answered_by = it.child("answered_by").value as String,
-                                        category = it.child("category").value as String,
-                                        id = it.child("id").value as String,
-                                        posted_date = it.child("posted_date").value as String,
-                                        question = it.child("question").value as String,
-                                        user = it.child("user").value as String,
-                                        status = (it.child("status").value as Long).toInt(),
+                                val question = snapshot.getValue(Question::class.java)
+                                question?.let {
+                                    list.add(question)
+                                } ?: {
+                                    list.add(
+                                        Question(
+                                            uuid = it.child("uuid").value as String,
+                                            answer = it.child("answer").value as String,
+                                            answeredBy = it.child("answeredBy").value as Teacher,
+                                            answeredDate = it.child("answeredDate").value as Long,
+                                            askedBy = it.child("askedBy").value as User,
+                                            askedDate = it.child("askedDate").value as Long,
+                                            category = it.child("category").value as Category,
+                                            question = it.child("question").value as String,
+                                            references = it.child("references").value as List<String>,
+                                            status = (it.child("status").value as Long).toInt(),
+                                        )
                                     )
-                                )
+                                }
                             } catch (e: Exception) {
                                 e.printStackTrace()
                             }

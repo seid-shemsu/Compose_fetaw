@@ -5,8 +5,8 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 
-@Entity(tableName = "categories")
-data class Category(
+@Entity(tableName = "teachers")
+data class Teacher(
     @ColumnInfo(name = "name") var name: String = "",
-    @PrimaryKey @ColumnInfo(name = "uuid") var uuid: String = "",
+    @PrimaryKey @ColumnInfo(name = "uuid") var uuid: String = ""
 )

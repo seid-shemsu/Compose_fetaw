@@ -46,7 +46,7 @@ class FavFragment : Fragment() {
                 var questions by remember { mutableStateOf(mutableListOf<Question>()) }
                 val db = DB(context)
                 LaunchedEffect(true) {
-                    questions.addAll(db.getQuestions())
+                    //questions.addAll(db.getQuestions())
                 }
                 Scaffold {
                     Column(modifier = Modifier.fillMaxSize()) {

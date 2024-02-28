@@ -2,6 +2,7 @@ package com.seid.fetawa_.ui.profile
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.os.UserHandle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -28,16 +29,23 @@ import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
 import com.google.firebase.auth.FirebaseAuth
 import com.seid.fetawa_.R
-import com.seid.fetawa_.utils.SPUtils
+import com.seid.fetawa_.db.DB
+import com.seid.fetawa_.models.User
+import kotlinx.coroutines.runBlocking
 
 class ProfileFragment : Fragment() {
     private lateinit var viewModel: ProfileViewModel
-
+    private lateinit var user: User
     @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        runBlocking {
+            Thread {
+                user = DB(requireContext()).dbDao().getUser() ?: User()
+            }.start()
+        }
         return ComposeView(requireContext()).apply {
             setContent {
                 Scaffold {
@@ -76,7 +84,7 @@ class ProfileFragment : Fragment() {
                                 verticalAlignment = CenterVertically
                             ) {
                                 Text(
-                                    SPUtils.getName(context).replaceFirstChar { it.uppercase() },
+                                    user.name.replaceFirstChar { it.uppercase() },
                                     fontSize = 30.sp,
                                     color = Color.Black,
                                     fontWeight = FontWeight.Bold
@@ -94,7 +102,7 @@ class ProfileFragment : Fragment() {
                         RowElement(
                             icon = R.drawable.ic_baseline_phone_24,
                             title = "Phone Number",
-                            value = SPUtils.getPhone(context)
+                            value = user.uuid
                         ) {
 
                         }
@@ -102,7 +110,7 @@ class ProfileFragment : Fragment() {
                         RowElement(
                             icon = R.drawable.ic_baseline_mail_24,
                             title = "Email",
-                            value = SPUtils.getEmail(context)
+                            value = user.email
                         ) {
 
                         }
@@ -129,8 +137,6 @@ class ProfileFragment : Fragment() {
                             value = null,
                         ) {
 
-                            FirebaseAuth.getInstance().signOut()
-                            SPUtils.signOut(context)
                             activity?.finish()
                         }
                     }

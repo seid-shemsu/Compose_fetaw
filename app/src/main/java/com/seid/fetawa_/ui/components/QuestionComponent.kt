@@ -46,7 +46,7 @@ fun QuestionComponent(
     screen: String,
     function: () -> Unit
 ) {
-    val favorite = remember { mutableStateOf(db.isFav(question.id)) }
+    //val favorite = remember { mutableStateOf(db.isFav(question.id)) }
     Spacer(modifier = Modifier.height(10.dp))
     Box(
         modifier = Modifier
@@ -77,13 +77,13 @@ fun QuestionComponent(
                     verticalArrangement = Arrangement.SpaceAround
                 ) {
                     Text(
-                        question.user ?: "",
+                        question.askedBy.name,
                         color = Color.White,
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        "By - ${question.answered_by}",
+                        "By - ${question.answeredBy.name}",
                         color = Color.White,
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Normal
@@ -108,8 +108,7 @@ fun QuestionComponent(
                 )
                 Spacer(modifier = Modifier.width(5.dp))
                 Text(
-                    (question.category
-                        ?: ""),
+                    question.category.name,
                     color = Color.White,
                     fontWeight = FontWeight.Medium
                 )
@@ -145,7 +144,7 @@ fun QuestionComponent(
                     Text(
                         text = "Posted ${
                             DateFormatter.getMoment(
-                                question.posted_date?.toLong()
+                                question.askedDate
                             )
                         }",
                         fontWeight = FontWeight.Medium,
@@ -155,7 +154,7 @@ fun QuestionComponent(
                 }
                 Icon(
                     if (screen == HOME_SCREEN) {
-                        if (favorite.value) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder
+                        /*if (favorite.value) Icons.Filled.Favorite else*/ Icons.Filled.FavoriteBorder
                     } else {
                         Icons.Filled.Delete
                     },
@@ -164,7 +163,7 @@ fun QuestionComponent(
                     modifier = Modifier
                         .padding(end = 10.dp)
                         .clickable {
-                            if (screen == HOME_SCREEN) {
+                            /*if (screen == HOME_SCREEN) {
                                 if (favorite.value)
                                     db.removeQuestion(question.id)
                                 else
@@ -173,7 +172,7 @@ fun QuestionComponent(
                             } else {
                                 db.removeQuestion(question.id)
                                 function()
-                            }
+                            }*/
                         }
                 )
             }

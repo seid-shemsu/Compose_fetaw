@@ -17,7 +17,7 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -27,52 +27,58 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
+import com.seid.fetawa_.db.DB
 import com.seid.fetawa_.models.Question
+import com.seid.fetawa_.models.User
 import com.seid.fetawa_.ui.components.*
 import com.seid.fetawa_.utils.AnimatedShimmer
 import com.seid.fetawa_.utils.Constants
 import com.seid.fetawa_.utils.Resource
+import kotlinx.coroutines.runBlocking
 
 class MineFragment : Fragment() {
     private lateinit var viewModel: MineViewModel
-
+    private lateinit var user: User
     @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         viewModel = MineViewModel()
+        runBlocking {
+            Thread {
+                user = DB(requireContext()).dbDao().getUser() ?: User()
+            }.start()
+        }
         return ComposeView(requireContext()).apply {
 
             setContent {
-                var selectedCat = remember { mutableStateOf("All") }
-                var loading = remember { mutableStateOf(true) }
-                var questions: List<Question> = remember { listOf() }
+                var selectedCat by remember { mutableStateOf("All") }
+                var loading by remember { mutableStateOf(true) }
+                var questions by remember { mutableStateOf(listOf<Question>()) }
                 Scaffold() {
                     LaunchedEffect(true) {
-                        viewModel.getQuestions(context)
+                        viewModel.getQuestions(context, user.uuid)
                     }
 
                     viewModel.questionsResponse.collectAsState().value.let {
                         when (it.status) {
                             Resource.Status.SUCCESS -> {
-                                LaunchedEffect(true) {
-
-                                    Log.e("List", "${it.data?.size}")
-                                    if (it.data != null)
-                                        questions = it.data
-                                    loading.value = false
+                                LaunchedEffect(it.data) {
+                                    Log.e("TAG", "----------${it}")
+                                    questions=(it.data ?: listOf())
+                                    loading = false
                                 }
                             }
                             Resource.Status.ERROR -> {
                                 LaunchedEffect(true) {
 
-                                    loading.value = false
+                                    loading = false
                                 }
                             }
                             Resource.Status.LOADING -> {
                                 LaunchedEffect(true) {
-                                    loading.value = true
+                                    loading = true
 
                                 }
                             }
@@ -83,58 +89,20 @@ class MineFragment : Fragment() {
                     Column {
                         Greeting(context = context)
                         TitleComponent(title = "My Questions")
-                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp)) {
-                            Box(modifier = Modifier
-                                    .clip(RoundedCornerShape(100.dp))
-                                    .background(
-                                        if (selectedCat.value.equals("All"))
-                                            Constants.blue
-                                        else
-                                            Color.LightGray
-                                    )
-                                    .clickable {
-                                        selectedCat.value = "All"
-                                        //homeViewModel.getQuestions(categories[index])
-                                    }
-                                    .padding(
-                                        horizontal = 20.dp,
-                                        vertical = 7.dp
-                                    ),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    "All",
-                                    fontWeight =
-                                    if (selectedCat.value.equals("All"))
-                                        FontWeight.Bold
-                                    else
-                                        FontWeight.Medium,
-                                    color =
-                                    if (selectedCat.value.equals("All"))
-                                        Color.White
-                                    else
-                                        Color.Black
-                                )
-                            }
-                            Box(
-                                modifier = Modifier
-                                    .width(30.dp)
-                                    .height(5.dp)
-                                    .background(
-                                        Color.LightGray
-                                    )
-                            )
+                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 20.dp)) {
                             Box(modifier = Modifier
                                 .clip(RoundedCornerShape(100.dp))
                                 .background(
-                                    if (selectedCat.value.equals("Saved"))
+                                    if (selectedCat.equals("All"))
                                         Constants.blue
                                     else
                                         Color.LightGray
                                 )
                                 .clickable {
-                                    selectedCat.value = "Saved"
-                                    //homeViewModel.getQuestions(categories[index])
+                                    selectedCat = "All"
+                                    viewModel.getList(1)
                                 }
                                 .padding(
                                     horizontal = 20.dp,
@@ -143,14 +111,14 @@ class MineFragment : Fragment() {
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
-                                    "Saved",
+                                    "All",
                                     fontWeight =
-                                    if (selectedCat.value.equals("Saved"))
+                                    if (selectedCat.equals("All"))
                                         FontWeight.Bold
                                     else
                                         FontWeight.Medium,
                                     color =
-                                    if (selectedCat.value.equals("Saved"))
+                                    if (selectedCat.equals("All"))
                                         Color.White
                                     else
                                         Color.Black
@@ -167,14 +135,54 @@ class MineFragment : Fragment() {
                             Box(modifier = Modifier
                                 .clip(RoundedCornerShape(100.dp))
                                 .background(
-                                    if (selectedCat.value.equals("Answered"))
+                                    if (selectedCat == "Pending")
                                         Constants.blue
                                     else
                                         Color.LightGray
                                 )
                                 .clickable {
-                                    selectedCat.value = "Answered"
-                                    //homeViewModel.getQuestions(categories[index])
+                                    selectedCat = "Pending"
+                                    viewModel.getList(1)
+                                }
+                                .padding(
+                                    horizontal = 20.dp,
+                                    vertical = 7.dp
+                                ),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    "Pending",
+                                    fontWeight =
+                                    if (selectedCat.equals("Pending"))
+                                        FontWeight.Bold
+                                    else
+                                        FontWeight.Medium,
+                                    color =
+                                    if (selectedCat.equals("Pending"))
+                                        Color.White
+                                    else
+                                        Color.Black
+                                )
+                            }
+                            Box(
+                                modifier = Modifier
+                                    .width(30.dp)
+                                    .height(5.dp)
+                                    .background(
+                                        Color.LightGray
+                                    )
+                            )
+                            Box(modifier = Modifier
+                                .clip(RoundedCornerShape(100.dp))
+                                .background(
+                                    if (selectedCat == "Answered")
+                                        Constants.blue
+                                    else
+                                        Color.LightGray
+                                )
+                                .clickable {
+                                    selectedCat = "Answered"
+                                    viewModel.getList(2)
                                 }
                                 .padding(
                                     horizontal = 20.dp,
@@ -185,12 +193,12 @@ class MineFragment : Fragment() {
                                 Text(
                                     "Answered",
                                     fontWeight =
-                                    if (selectedCat.value.equals("Answered"))
+                                    if (selectedCat.equals("Answered"))
                                         FontWeight.Bold
                                     else
                                         FontWeight.Medium,
                                     color =
-                                    if (selectedCat.value.equals("Answered"))
+                                    if (selectedCat.equals("Answered"))
                                         Color.White
                                     else
                                         Color.Black
@@ -198,7 +206,7 @@ class MineFragment : Fragment() {
                             }
                         }
                         Spacer(modifier = Modifier.height(10.dp))
-                        AnimatedVisibility(loading.value) {
+                        AnimatedVisibility(loading) {
                             val configuration = LocalConfiguration.current
                             Column() {
                                 Row(
@@ -219,7 +227,7 @@ class MineFragment : Fragment() {
                             }
 
                         }
-                        AnimatedVisibility(!loading.value) {
+                        AnimatedVisibility(!loading) {
                             Column {
                                 SearchComponent()
                                 Spacer(modifier = Modifier.height(5.dp))
