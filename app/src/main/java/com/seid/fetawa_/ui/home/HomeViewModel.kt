@@ -1,5 +1,6 @@
 package com.seid.fetawa_.ui.home
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.seid.fetawa_.models.Question
 import com.google.firebase.database.DataSnapshot
@@ -35,13 +36,13 @@ class HomeViewModel : ViewModel() {
         viewModelScope.launch {
             questionsResponse.value = Resource.loading()
             FirebaseDatabase.getInstance().getReference("answered")
-                .child(category.value.lowercase())
                 .addListenerForSingleValueEvent(object : ValueEventListener {
                     override fun onDataChange(snapshot: DataSnapshot) {
                         val list: MutableList<Question> = mutableListOf()
                         snapshot.children.forEach {
                             try {
-                                val question = snapshot.getValue(Question::class.java)
+                                val question = it.getValue(Question::class.java)
+                                Log.e("TAG", "-- ${snapshot.value}")
                                 question?.let {
                                     list.add(question)
                                 } ?: {
@@ -64,7 +65,7 @@ class HomeViewModel : ViewModel() {
                                 e.printStackTrace()
                             }
                         }
-                        questionsResponse.value = Resource.success(list)
+                        questionsResponse.value = Resource.success(list.reversed())
                     }
 
                     override fun onCancelled(error: DatabaseError) {

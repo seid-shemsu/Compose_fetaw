@@ -102,7 +102,7 @@ class MineFragment : Fragment() {
                                 )
                                 .clickable {
                                     selectedCat = "All"
-                                    viewModel.getList(1)
+                                    viewModel.getList(0)
                                 }
                                 .padding(
                                     horizontal = 20.dp,
