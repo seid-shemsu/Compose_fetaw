@@ -50,7 +50,7 @@ class MineViewModel : ViewModel() {
                                             askedDate = it.child("askedDate").value as Long,
                                             category = it.child("category").value as Category,
                                             question = it.child("question").value as String,
-                                            references = it.child("references").value as List<String>,
+                                            //references = it.child("references").value as List<String>,
                                             status = (it.child("status").value as Long).toInt(),
                                         )
                                     )

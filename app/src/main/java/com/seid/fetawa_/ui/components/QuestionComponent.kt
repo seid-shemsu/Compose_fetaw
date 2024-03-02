@@ -37,6 +37,7 @@ import com.seid.fetawa_.db.DB
 import com.seid.fetawa_.utils.Constants
 import com.seid.fetawa_.utils.Constants.HOME_SCREEN
 import com.seid.fetawa_.utils.DateFormatter
+import java.io.Serializable
 
 @Composable
 fun QuestionComponent(
@@ -186,7 +187,7 @@ fun QuestionComponent(
                 .align(Alignment.TopEnd)
                 .clickable {
                     var intent = Intent(context, DetailActivity::class.java)
-                    intent.putExtra("object", question)
+                    intent.putExtra("object", question as Serializable)
                     context.startActivity(intent)
                 },
             verticalAlignment = Alignment.CenterVertically,

@@ -12,7 +12,7 @@ import com.seid.fetawa_.models.User
 import com.seid.fetawa_.models.converters.Converters
 
 
-@Database(entities = [Question::class, Category::class, Teacher::class, User::class], version = 1, exportSchema = false)
+@Database(entities = [Question::class, Category::class, Teacher::class, User::class], version = 3, exportSchema = false)
 @TypeConverters(Converters::class)
 abstract class DB: RoomDatabase() {
 
