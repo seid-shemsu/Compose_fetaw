@@ -8,6 +8,7 @@ import android.util.Log
 import android.view.View
 import android.view.Window
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
@@ -38,6 +39,7 @@ import com.seid.fetawa_.db.DB
 import com.seid.fetawa_.models.Question
 import com.seid.fetawa_.models.User
 import com.seid.fetawa_.utils.Constants
+import com.seid.fetawa_.utils.SpUtils
 import com.seid.fetawa_.utils.Utils
 import java.util.UUID
 import java.util.concurrent.TimeUnit
@@ -130,31 +132,26 @@ class MainActivity : AppCompatActivity() {
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
         dialog.setContentView(R.layout.ask_dialog)
         dialog.show()
-        progress = dialog.findViewById(R.id.progress)
-        cancel_card = dialog.findViewById(R.id.cancel_card)
-        cancel_text = dialog.findViewById(R.id.cancel_text)
-        cancel_text.setOnClickListener {
-            current_action = "send"
-            dialog.dismiss()
-        }
-        cancel_card.setOnClickListener {
-            current_action = "send"
-            dialog.dismiss()
-        }
+        val save = dialog.findViewById<TextView>(R.id.save)
+        val submit = dialog.findViewById<TextView>(R.id.submit)
+        val progress = dialog.findViewById<ProgressBar>(R.id.progress)
+        val close = dialog.findViewById<ImageView>(R.id.close)
+        val question = dialog.findViewById<EditText>(R.id.question)
+        val draft = SpUtils.getDraft(this)
+        question.setText(draft)
 
-        send_card = dialog.findViewById(R.id.send_card)
-        send_text = dialog.findViewById(R.id.send_text)
-        question_text_input = dialog.findViewById(R.id.question)
-        send_card.setOnClickListener {
-            if (question_text_input.text.toString().length > 15) {
-                sendQuestion(question_text_input.text.toString())
-            } else {
-                question_text_input.error = "Use more words."
-            }
+        close.setOnClickListener { dialog.dismiss() }
+        save.setOnClickListener {
+            SpUtils.saveDraft(this, question.text.toString())
+            dialog.dismiss()
         }
-        send_text.setOnClickListener {
-            if (question_text_input.text.toString().length > 15) {
-                sendQuestion(question_text_input.text.toString())
+        submit.setOnClickListener {
+            if (question.text.toString().length > 15) {
+                save.isEnabled = false
+                progress.visibility = View.VISIBLE
+                submit.visibility = View.GONE
+                SpUtils.saveDraft(this, "")
+                sendQuestion(question.text.toString())
             } else {
                 question_text_input.error = "Use more words."
             }
@@ -169,24 +166,30 @@ class MainActivity : AppCompatActivity() {
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
         dialog.setContentView(R.layout.login_dialog)
         dialog.show()
-        progress = dialog.findViewById(R.id.progress)
-        name_input = dialog.findViewById(R.id.name_input)
-        name = dialog.findViewById(R.id.name)
-        send_card = dialog.findViewById(R.id.send_code_card)
-        send_text = dialog.findViewById(R.id.send_code_text)
-        cancel_card = dialog.findViewById(R.id.cancel_card)
-        cancel_text = dialog.findViewById(R.id.cancel_text)
-        cancel_card.setOnClickListener {
+        val cancel = dialog.findViewById<TextView>(R.id.cancel)
+        val submit = dialog.findViewById<TextView>(R.id.submit)
+        val progress = dialog.findViewById<ProgressBar>(R.id.progress)
+        val close = dialog.findViewById<ImageView>(R.id.close)
+        val name = dialog.findViewById<EditText>(R.id.question)
+
+        close.setOnClickListener { dialog.dismiss() }
+        cancel.setOnClickListener {
             dialog.dismiss()
         }
-        send_card.setOnClickListener {
-            save()
+        submit.setOnClickListener {
+            if (name.text.toString().isNotEmpty()) {
+                cancel.isEnabled = false
+                progress.visibility = View.VISIBLE
+                submit.visibility = View.GONE
+                save()
+            } else {
+                question_text_input.error = ""
+            }
         }
     }
 
     private fun sendQuestion(q: String) {
-        progressing(true)
-        val id =  FirebaseDatabase.getInstance().reference.push().key ?: UUID.randomUUID().toString()
+        val id = FirebaseDatabase.getInstance().reference.push().key ?: UUID.randomUUID().toString()
         val question = Question()
         question.uuid = id
         question.askedBy = user
@@ -196,159 +199,27 @@ class MainActivity : AppCompatActivity() {
         FirebaseDatabase.getInstance().getReference("questions").child(id).setValue(question)
         FirebaseDatabase.getInstance().getReference("users_questions").child(user.uuid).child(id)
             .setValue(question).addOnSuccessListener {
-                progressing(false)
                 Toast.makeText(this, "Question asked Successfully", Toast.LENGTH_SHORT).show()
                 dialog.dismiss()
             }
     }
 
     private fun save() {
-        if (!name.text.isNullOrEmpty()) {
-            progressing(true)
-            val uuid = UUID.randomUUID().toString()
-            user = User(name = name.text.toString(), uuid = uuid)
-            Thread {
-                DB(this).dbDao().insertUser(user)
+        val uuid = UUID.randomUUID().toString()
+        user = User(name = name.text.toString(), uuid = uuid)
+        Thread {
+            DB(this).dbDao().insertUser(user)
 
-            }.start()
-            FirebaseDatabase.getInstance().getReference("Users").child(uuid).setValue(user)
-                .addOnSuccessListener {
-                    progressing(false)
-                    Toast.makeText(this, "Login Success", Toast.LENGTH_SHORT).show()
-                    dialog.dismiss()
-                    ask()
-                }
-        } else {
-            Log.e("Name", name.text.toString())
-            Toast.makeText(this, "Check your input", Toast.LENGTH_SHORT).show()
-        }
-
-    }
-
-    /*private fun sendCode() {
-        var num = phone.text.toString()
-        if (checkPhone(num)) {
-            progressing(true)
-            if (num.startsWith("0"))
-                num = "+251" + num.substring(1, num.length);
-            else if (num.startsWith("251"))
-                num = "+" + num;
-            phone.isEnabled = false
-            phone_number = num.substring(1, num.length);
-            sendVerificationCode(num)
-        } else {
-            phone.error = "Check Your Input"
-        }
-    }*/
-
-    private fun progressing(value: Boolean) {
-        if (value) {
-            progress.visibility = View.VISIBLE
-            send_text.visibility = View.GONE
-            cancel_card.isEnabled = false
-        } else {
-            progress.visibility = View.GONE
-            send_text.visibility = View.VISIBLE
-        }
-        cancel_card.isEnabled = !value
-        cancel_text.isEnabled = !value
-    }
-
-    private fun checkPhone(number: String): Boolean {
-        if (number.length < 10) return false
-        if (number.startsWith("0")) {
-            if (number.length != 10) return false
-        }
-        if (number.startsWith("+251")) {
-            if (number.length != 13) return false
-        }
-        if (number.startsWith("251")) if (number.length != 12) return false
-        return true
-    }
-
-    private fun verifyCode(code: String) {
-        try {
-            progressing(true)
-            val credential = PhoneAuthProvider.getCredential(verificationId, code)
-            signInWithCredential(credential)
-        } catch (e: Exception) {
-            e.printStackTrace()
-            //this.code.setError("Invalid code...")
-            progressing(false)
-            send_text.text = "Verify"
-        }
-    }
-
-    private fun signInWithCredential(credential: PhoneAuthCredential) {
-        mAuth!!.signInWithCredential(credential).addOnCompleteListener { task: Task<AuthResult?> ->
-            if (task.isSuccessful) {
-                FirebaseDatabase.getInstance().getReference("Users").child(phone_number)
-                    .addValueEventListener(object : ValueEventListener {
-                        override fun onDataChange(snapshot: DataSnapshot) {
-                            val sp = getSharedPreferences(Constants.SP_USER, MODE_PRIVATE)
-                            if (!snapshot.hasChild("phone")) {
-                                progressing(false)
-                                send_text.text = "Save"
-                                //phone_input.visibility = View.GONE
-                                // code_input.visibility = View.GONE
-                                name_input.visibility = View.VISIBLE
-                                //email_input.visibility = View.VISIBLE
-                                current_action = "save"
-                            } else {
-                                sp.edit().putBoolean("auth", true).putString(
-                                    "phone", snapshot.child("phone").value as String?
-                                ).putString(
-                                    "email", snapshot.child("email").value as String?
-                                ).putString("name", snapshot.child("name").value as String?).apply()
-                                dialog.dismiss()
-                                ask()
-                            }
-                        }
-
-                        override fun onCancelled(error: DatabaseError) {}
-                    })
-            } else {
-                if (task.exception!!.message!!.contains("invalid")) {
-                    //code.setError("Invalid code...")
-                    send_text.text = "Verify"
-                    progressing(false)
-                }
+        }.start()
+        FirebaseDatabase.getInstance().getReference("Users").child(uuid).setValue(user)
+            .addOnSuccessListener {
+                Toast.makeText(this, "Login Success", Toast.LENGTH_SHORT).show()
+                dialog.dismiss()
+                ask()
+            }.addOnFailureListener {
+                Toast.makeText(this, "Failed", Toast.LENGTH_SHORT).show()
+                dialog.dismiss()
             }
-        }
     }
-
-    private fun sendVerificationCode(number: String) {
-        PhoneAuthProvider.getInstance().verifyPhoneNumber(
-            number, 60, TimeUnit.SECONDS, this, mCallBack
-        )
-    }
-
-    private val mCallBack: OnVerificationStateChangedCallbacks =
-        object : OnVerificationStateChangedCallbacks() {
-            override fun onCodeSent(s: String, forceResendingToken: ForceResendingToken) {
-                super.onCodeSent(s, forceResendingToken)
-                //code.requestFocus()
-                verificationId = s
-                //code_input.isEnabled = true
-                send_text.text = "Verify"
-                current_action = "verify"
-                progressing(false)
-            }
-
-            override fun onVerificationCompleted(phoneAuthCredential: PhoneAuthCredential) {
-                val smsCode = phoneAuthCredential.smsCode
-                if (smsCode != null) {
-                    //code.setText(smsCode)
-                    verifyCode(smsCode)
-                }
-            }
-
-            override fun onVerificationFailed(e: FirebaseException) {
-                Toast.makeText(this@MainActivity, e.message, Toast.LENGTH_LONG).show()
-                send_text.text = "Send Code"
-                //code_input.isEnabled = false
-                progressing(false)
-            }
-        }
 }
 
