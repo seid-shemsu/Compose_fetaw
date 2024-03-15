@@ -170,7 +170,7 @@ class MainActivity : AppCompatActivity() {
         val submit = dialog.findViewById<TextView>(R.id.submit)
         val progress = dialog.findViewById<ProgressBar>(R.id.progress)
         val close = dialog.findViewById<ImageView>(R.id.close)
-        val name = dialog.findViewById<EditText>(R.id.question)
+        name = dialog.findViewById(R.id.name)
 
         close.setOnClickListener { dialog.dismiss() }
         cancel.setOnClickListener {

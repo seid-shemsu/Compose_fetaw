@@ -5,14 +5,13 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
-import com.seid.fetawa_.models.Category
 import com.seid.fetawa_.models.Question
 import com.seid.fetawa_.models.Teacher
 import com.seid.fetawa_.models.User
 import com.seid.fetawa_.models.converters.Converters
 
 
-@Database(entities = [Question::class, Category::class, Teacher::class, User::class], version = 3, exportSchema = false)
+@Database(entities = [Question::class, Teacher::class, User::class], version = 4, exportSchema = false)
 @TypeConverters(Converters::class)
 abstract class DB: RoomDatabase() {
 

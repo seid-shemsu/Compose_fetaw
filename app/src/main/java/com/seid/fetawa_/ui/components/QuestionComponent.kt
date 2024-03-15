@@ -109,7 +109,7 @@ fun QuestionComponent(
                 )
                 Spacer(modifier = Modifier.width(5.dp))
                 Text(
-                    question.category.name,
+                    question.category,
                     color = Color.White,
                     fontWeight = FontWeight.Medium
                 )

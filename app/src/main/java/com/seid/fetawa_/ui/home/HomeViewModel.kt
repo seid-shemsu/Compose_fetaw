@@ -8,7 +8,6 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import com.seid.fetawa_.models.Category
 import com.seid.fetawa_.models.Teacher
 import com.seid.fetawa_.models.User
 import com.seid.fetawa_.utils.Resource
@@ -22,10 +21,10 @@ class HomeViewModel : ViewModel() {
 
     private val viewModelJob = Job()
     private val viewModelScope = CoroutineScope(Dispatchers.IO + viewModelJob)
-    val category: MutableStateFlow<Category> = MutableStateFlow(Category())
+    val category: MutableStateFlow<String> = MutableStateFlow(String())
     val questionsResponse: MutableStateFlow<Resource<List<Question>>> =
         MutableStateFlow(Resource.initial())
-    val categoryResponse: MutableStateFlow<Resource<List<Category>>> =
+    val categoryResponse: MutableStateFlow<Resource<List<String>>> =
         MutableStateFlow(Resource.initial())
 
     init {
@@ -55,7 +54,7 @@ class HomeViewModel : ViewModel() {
                                             answeredDate = it.child("answeredDate").value as Long,
                                             askedBy = it.child("askedBy").value as User,
                                             askedDate = it.child("askedDate").value as Long,
-                                            category = it.child("category").value as Category,
+                                            category = it.child("category").value as String,
                                             question = it.child("question").value as String,
                                             //references = it.child("references").value as List<String>,
                                             status = (it.child("status").value as Long).toInt(),
@@ -81,12 +80,12 @@ class HomeViewModel : ViewModel() {
         viewModelScope.launch {
             categoryResponse.value = Resource.loading()
             FirebaseDatabase.getInstance().getReference("categories")
-                .addListenerForSingleValueEvent(object : ValueEventListener {
+                .addValueEventListener(object : ValueEventListener {
                     override fun onDataChange(snapshot: DataSnapshot) {
-                        val list: MutableList<Category> = mutableListOf()
+                        val list: MutableList<String> = mutableListOf()
                         snapshot.children.forEach {
-                            it.getValue(Category::class.java)?.let { cat ->
-                                list.add(cat)
+                            it.child("name").value?.let { cat ->
+                                list.add(cat.toString())
                             }
                         }
                         categoryResponse.value = Resource.success(list)
@@ -107,7 +106,7 @@ class HomeViewModel : ViewModel() {
 
         viewModelScope.launch {
             questionsResponse.value = Resource.loading()
-            val query = databaseReference.orderByChild("category/uuid").equalTo(category.value.uuid)
+            val query = databaseReference.orderByChild("category/name").equalTo(category.value)
                 .limitToFirst(5)
 
             if (startAtKey.isNotEmpty()) {
@@ -132,7 +131,7 @@ class HomeViewModel : ViewModel() {
                                         answeredDate = it.child("answeredDate").value as Long,
                                         askedBy = it.child("askedBy").value as User,
                                         askedDate = it.child("askedDate").value as Long,
-                                        category = it.child("category").value as Category,
+                                        category = it.child("category").value as String,
                                         question = it.child("question").value as String,
                                         //references = it.child("references").value as List<String>,
                                         status = (it.child("status").value as Long).toInt(),

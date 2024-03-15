@@ -37,7 +37,7 @@ fun MyQuestion(question: Question) {
             .padding(top = 15.dp)
     ) {
         Column(horizontalAlignment = Alignment.Start) {
-            if (question.category.name.isNotEmpty()) {
+            if (question.category.isNotEmpty()) {
 
                 Row(
                     modifier = Modifier.padding(start = 10.dp,end = 10.dp, bottom = 15.dp),
@@ -48,7 +48,7 @@ fun MyQuestion(question: Question) {
                     )
                     Spacer(modifier = Modifier.width(5.dp))
                     Text(
-                        question.category.name, color = Color.White, fontWeight = FontWeight.Medium
+                        question.category, color = Color.White, fontWeight = FontWeight.Medium
                     )
                 }
             }

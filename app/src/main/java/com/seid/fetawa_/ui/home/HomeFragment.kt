@@ -32,7 +32,6 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.seid.fetawa_.models.Question
 import com.seid.fetawa_.db.DB
-import com.seid.fetawa_.models.Category
 import com.seid.fetawa_.ui.components.Greeting
 import com.seid.fetawa_.ui.components.QuestionComponent
 import com.seid.fetawa_.ui.components.SearchComponent
@@ -56,7 +55,7 @@ class HomeFragment : Fragment() {
             )
             setContent {
                 var questions: List<Question> = remember { listOf() }
-                var categories: List<Category> = remember { listOf() }
+                var categories: List<String> = remember { listOf() }
                 var loading = remember { mutableStateOf(true) }
                 var catLoad = remember { mutableStateOf(false) }
                 val selectedCat = homeViewModel.category.collectAsState()
@@ -136,8 +135,8 @@ class HomeFragment : Fragment() {
                                                     modifier = Modifier
                                                         .clip(RoundedCornerShape(100.dp))
                                                         .background(
-                                                            if (selectedCat.value!!.name.equals(
-                                                                    categories[index].name,
+                                                            if (selectedCat.value!!.equals(
+                                                                    categories[index],
                                                                     ignoreCase = true
                                                                 )
                                                             )
@@ -157,10 +156,10 @@ class HomeFragment : Fragment() {
                                                     contentAlignment = Center
                                                 ) {
                                                     Text(
-                                                        categories[index].name,
+                                                        categories[index],
                                                         fontWeight =
-                                                        if (selectedCat.value!!.name.equals(
-                                                                categories[index].name,
+                                                        if (selectedCat.value!!.equals(
+                                                                categories[index],
                                                                 ignoreCase = true
                                                             )
                                                         )
@@ -168,8 +167,8 @@ class HomeFragment : Fragment() {
                                                         else
                                                             FontWeight.Medium,
                                                         color =
-                                                        if (selectedCat.value!!.name.equals(
-                                                                categories[index].name,
+                                                        if (selectedCat.value!!.equals(
+                                                                categories[index],
                                                                 ignoreCase = true
                                                             )
                                                         )
@@ -234,7 +233,7 @@ class HomeFragment : Fragment() {
                                     }, modifier = Modifier.padding(horizontal = 20.dp))
                                 }
                             }
-                            Log.e("Category", "${catLoad.value}")
+                            Log.e("String", "${catLoad.value}")
                             Log.e("Question", "${loading.value}")
                         }
 

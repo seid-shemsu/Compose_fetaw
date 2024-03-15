@@ -3,7 +3,6 @@ package com.seid.fetawa_.models.converters
 import androidx.room.TypeConverter
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import com.seid.fetawa_.models.Category
 import com.seid.fetawa_.models.Teacher
 import com.seid.fetawa_.models.User
 
@@ -28,16 +27,6 @@ class Converters {
     @TypeConverter
     fun toTeacher(teacherString: String): Teacher {
         return gson.fromJson(teacherString, Teacher::class.java)
-    }
-
-    @TypeConverter
-    fun fromCategory(category: Category): String {
-        return gson.toJson(category)
-    }
-
-    @TypeConverter
-    fun toCategory(categoryString: String): Category {
-        return gson.fromJson(categoryString, Category::class.java)
     }
 
     @TypeConverter
