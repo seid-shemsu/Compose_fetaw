@@ -2,16 +2,12 @@ package com.seid.fetawa_.ui.components
 
 import android.content.Context
 import android.content.Intent
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
@@ -23,40 +19,53 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewModelScope
 import com.seid.fetawa_.models.Question
 import com.seid.fetawa_.R
 import com.seid.fetawa_.activities.DetailActivity
 import com.seid.fetawa_.db.DB
+import com.seid.fetawa_.ui.home.HomeViewModel
 import com.seid.fetawa_.utils.Constants
 import com.seid.fetawa_.utils.Constants.HOME_SCREEN
 import com.seid.fetawa_.utils.DateFormatter
+import kotlinx.coroutines.launch
+import java.io.Serializable
 
 @Composable
 fun QuestionComponent(
+    homeViewModel: HomeViewModel,
     context: Context,
     question: Question,
     db: DB,
     screen: String,
     function: () -> Unit
 ) {
-    val favorite = remember { mutableStateOf(db.isFav(question.id)) }
+    val favorite = remember { mutableStateOf(false) }
+    LaunchedEffect(question) {
+        favorite.value = homeViewModel.isFav(question.uuid)
+    }
     Spacer(modifier = Modifier.height(10.dp))
     Box(
         modifier = Modifier
             .clip(RoundedCornerShape(20.dp))
+            .height(200.dp)
     ) {
         Image(
             painter = painterResource(id = R.drawable.question_bg),
             contentDescription = "",
+            contentScale = ContentScale.FillBounds,
         )
-        Column(horizontalAlignment = Alignment.Start) {
+        Column(
+            horizontalAlignment = Alignment.Start,
+            verticalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier.fillMaxHeight()
+        ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.padding(10.dp)
@@ -77,13 +86,13 @@ fun QuestionComponent(
                     verticalArrangement = Arrangement.SpaceAround
                 ) {
                     Text(
-                        question.user ?: "",
+                        question.askedBy.name,
                         color = Color.White,
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        "By - ${question.answered_by}",
+                        "By - ${question.answeredBy.name}",
                         color = Color.White,
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Normal
@@ -108,8 +117,7 @@ fun QuestionComponent(
                 )
                 Spacer(modifier = Modifier.width(5.dp))
                 Text(
-                    (question.category
-                        ?: ""),
+                    question.category,
                     color = Color.White,
                     fontWeight = FontWeight.Medium
                 )
@@ -127,7 +135,7 @@ fun QuestionComponent(
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(Constants.light_gray)
-                    .padding(vertical = 20.dp),
+                    .padding(vertical = 10.dp),
                 horizontalArrangement = Arrangement.Absolute.SpaceBetween
             ) {
                 Row(
@@ -145,7 +153,7 @@ fun QuestionComponent(
                     Text(
                         text = "Posted ${
                             DateFormatter.getMoment(
-                                question.posted_date?.toLong()
+                                question.askedDate
                             )
                         }",
                         fontWeight = FontWeight.Medium,
@@ -166,12 +174,14 @@ fun QuestionComponent(
                         .clickable {
                             if (screen == HOME_SCREEN) {
                                 if (favorite.value)
-                                    db.removeQuestion(question.id)
+                                    homeViewModel.viewModelScope.launch { homeViewModel.removeFav(question) }
+
                                 else
-                                    db.addQuestion(question)
+                                    homeViewModel.viewModelScope.launch { homeViewModel.addFav(question) }
                                 favorite.value = !favorite.value
                             } else {
-                                db.removeQuestion(question.id)
+                                homeViewModel.viewModelScope.launch { homeViewModel.removeFav(question) }
+
                                 function()
                             }
                         }
@@ -180,6 +190,7 @@ fun QuestionComponent(
         }
         Row(
             modifier = Modifier
+                .padding(end = 10.dp)
                 .width(80.dp)
                 .height(50.dp)
                 .clip(RoundedCornerShape(100.dp))
@@ -187,7 +198,7 @@ fun QuestionComponent(
                 .align(Alignment.TopEnd)
                 .clickable {
                     var intent = Intent(context, DetailActivity::class.java)
-                    intent.putExtra("object", question)
+                    intent.putExtra("object", question as Serializable)
                     context.startActivity(intent)
                 },
             verticalAlignment = Alignment.CenterVertically,
@@ -210,43 +221,4 @@ fun QuestionComponent(
         }
     }
     Spacer(modifier = Modifier.height(10.dp))
-}
-
-@Composable
-fun AnimatedListItem(
-    item: String,
-    onItemClick: (String) -> Unit
-) {
-    var removing by remember { mutableStateOf(false) }
-    val slideAnim by animateFloatAsState(
-        targetValue = if (removing) -1000f else 0f,
-        animationSpec = tween(durationMillis = 500)
-    )
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(60.dp)
-            .padding(bottom = 8.dp)
-            .graphicsLayer(translationX = slideAnim)
-            .clickable { onItemClick(item) },
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = item,
-            style = MaterialTheme.typography.body1,
-            color = Color.Black,
-            modifier = Modifier.weight(1f)
-        )
-        IconButton(
-            onClick = { removing = true },
-            modifier = Modifier.size(48.dp)
-        ) {
-            Icon(
-                imageVector = Icons.Default.Delete,
-                contentDescription = "Delete",
-                tint = Color.Red
-            )
-        }
-    }
 }

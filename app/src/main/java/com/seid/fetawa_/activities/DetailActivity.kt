@@ -70,17 +70,20 @@ class DetailActivity : ComponentActivity() {
     lateinit var current_time: MutableState<Int>
     lateinit var progress: MutableState<Int>
     lateinit var category: String
+
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         question = intent.extras?.getSerializable("object") as Question
         val db = DB(this.applicationContext)
         val root = Environment.getExternalStorageDirectory().toString()
         val dir = File("$root/fetawa")
-        val file = File(dir, question.id + ".ogg")
+        val file = File(dir, question.uuid + ".ogg")
         setContent {
             Fetawa_Theme {
                 // A surface container using the 'background' color from the theme
-                val favorite = remember { mutableStateOf(db.isFav(question.id)) }
+                //val favorite = remember { mutableStateOf(db.isFav(question.id)) }
                 Log.e(
                     "Init",
                     "--------------------------------------------------------------------"
@@ -155,13 +158,13 @@ class DetailActivity : ComponentActivity() {
                                     verticalArrangement = Arrangement.SpaceAround
                                 ) {
                                     Text(
-                                        question.user ?: "",
+                                        question.askedBy.name ?: "",
                                         color = Color.White,
                                         fontSize = 18.sp,
                                         fontWeight = FontWeight.Bold
                                     )
                                     Text(
-                                        "By - ${question.answered_by}",
+                                        "By - ${question.answeredBy.name}",
                                         color = Color.White,
                                         fontSize = 13.sp,
                                         fontWeight = FontWeight.Normal
@@ -186,8 +189,7 @@ class DetailActivity : ComponentActivity() {
                                 )
                                 Spacer(modifier = Modifier.width(5.dp))
                                 Text(
-                                    (question.category
-                                        ?: ""),
+                                    question.category,
                                     color = Color.White,
                                     fontWeight = FontWeight.Medium
                                 )
@@ -223,7 +225,7 @@ class DetailActivity : ComponentActivity() {
                                     Text(
                                         text = "Posted ${
                                             DateFormatter.getMoment(
-                                                question.posted_date?.toLong()
+                                                question.askedDate
                                             )
                                         }",
                                         fontWeight = FontWeight.Medium,
@@ -232,17 +234,17 @@ class DetailActivity : ComponentActivity() {
                                     )
                                 }
                                 Icon(
-                                    if (favorite.value) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
+                                    /*if (favorite.value) Icons.Filled.Favorite else */Icons.Filled.FavoriteBorder,
                                     "",
                                     tint = Color.Red,
                                     modifier = Modifier
                                         .padding(end = 10.dp)
                                         .clickable {
-                                            if (favorite.value)
+                                            /*if (favorite.value)
                                                 db.removeQuestion(question.id)
                                             else
-                                                db.addQuestion(question)
-                                            favorite.value = !favorite.value
+                                                db.addQuestion(question)*/
+                                            //favorite.value = !favorite.value
                                         }
                                 )
                             }
@@ -430,7 +432,7 @@ class DetailActivity : ComponentActivity() {
             val root = Environment.getExternalStorageDirectory().toString()
             val dir = File("$root/fetawa")
             if (!dir.exists()) dir.mkdirs()
-            val file = File(dir, question.id + ".ogg")
+            val file = File(dir, question.uuid + ".ogg")
             isDownloading.value = true
             val storageReference =
                 FirebaseStorage.getInstance().getReference("answered")
@@ -462,7 +464,7 @@ class DetailActivity : ComponentActivity() {
         try {
             val root = Environment.getExternalStorageDirectory().toString()
             val dir = File("$root/fetawa")
-            val file = File(dir, question.id + ".ogg")
+            val file = File(dir, question.uuid + ".ogg")
             mediaPlayer?.setDataSource(file.toString())
             mediaPlayer?.prepare()
         } catch (e: java.lang.Exception) {

@@ -4,16 +4,18 @@ plugins {
     id 'com.google.gms.google-services'
     id 'com.google.firebase.crashlytics'
     id 'kotlin-parcelize'
+
+    id 'kotlin-kapt'
 }
 
 android {
     namespace 'com.seid.fetawa_'
-    compileSdk 33
+    compileSdk 34
 
     defaultConfig {
         applicationId "com.seid.fetawa_"
         minSdk 21
-        targetSdk 33
+        targetSdk 34
         versionCode 1
         versionName "1.0"
 
@@ -87,5 +89,10 @@ dependencies {
 
 
     implementation 'com.google.android.gms:play-services-ads-lite:22.3.0'
+
+    //Room Persistence Library
+    implementation "androidx.room:room-ktx:2.6.1"
+    kapt "androidx.room:room-compiler:2.6.1"
+    implementation 'com.google.code.gson:gson:2.8.7'
 
 }

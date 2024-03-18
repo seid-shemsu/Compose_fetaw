@@ -1,12 +1,20 @@
 package com.seid.fetawa_.models
 
+import androidx.room.ColumnInfo
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+import java.io.Serializable
+
+@Entity(tableName = "questions")
 data class Question(
-    val answer: String?,
-    val answered_by: String?,
-    val category: String?,
-    val id: String,
-    val posted_date: String?,
-    val question: String,
-    val user: String? = null,
-    val status: Int = 0,
-) : java.io.Serializable
+    @PrimaryKey @ColumnInfo(name = "uuid") var uuid: String = "",
+    @ColumnInfo(name = "answer") var answer: String = "",
+    @ColumnInfo(name = "answered_by") var answeredBy: Teacher = Teacher(),
+    @ColumnInfo(name = "answered_date") var answeredDate: Long = 0L,
+    @ColumnInfo(name = "asked_by") var askedBy: User = User(),
+    @ColumnInfo(name = "asked_date") var askedDate: Long = 0L,
+    @ColumnInfo(name = "category") var category: String = "",
+    @ColumnInfo(name = "question") var question: String = "",
+    @ColumnInfo(name = "references") var references: List<String> = ArrayList(),
+    @ColumnInfo(name = "status") var status: Int = 0
+): Serializable
