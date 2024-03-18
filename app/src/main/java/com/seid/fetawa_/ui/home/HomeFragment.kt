@@ -14,6 +14,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -25,6 +26,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -54,6 +56,9 @@ class HomeFragment : Fragment() {
                 ViewCompositionStrategy.Default
             )
             setContent {
+                LaunchedEffect(true) {
+                    homeViewModel.setupDb(requireContext())
+                }
                 var questions: List<Question> = remember { listOf() }
                 var categories: List<String> = remember { listOf() }
                 var loading = remember { mutableStateOf(true) }
@@ -222,13 +227,17 @@ class HomeFragment : Fragment() {
                                     LazyColumn(content = {
                                         items(questions.size) { index ->
                                             QuestionComponent(
+                                                homeViewModel = homeViewModel,
                                                 context = context,
                                                 question = questions[index],
                                                 db = db,
-                                                HOME_SCREEN
+                                                screen = HOME_SCREEN
                                             ) {
 
                                             }
+                                        }
+                                        item {
+
                                         }
                                     }, modifier = Modifier.padding(horizontal = 20.dp))
                                 }

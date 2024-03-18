@@ -1,13 +1,18 @@
 package com.seid.fetawa_.ui.home
 
+import android.content.Context
 import android.util.Log
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
+import androidx.room.Dao
 import com.seid.fetawa_.models.Question
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import com.seid.fetawa_.db.DB
+import com.seid.fetawa_.db.DBDao
 import com.seid.fetawa_.models.Teacher
 import com.seid.fetawa_.models.User
 import com.seid.fetawa_.utils.Resource
@@ -16,6 +21,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class HomeViewModel : ViewModel() {
 
@@ -23,6 +29,8 @@ class HomeViewModel : ViewModel() {
     private val viewModelScope = CoroutineScope(Dispatchers.IO + viewModelJob)
     val category: MutableStateFlow<String> = MutableStateFlow(String())
     val questionsResponse: MutableStateFlow<Resource<List<Question>>> =
+        MutableStateFlow(Resource.initial())
+    val favResponse: MutableStateFlow<Resource<List<Question>>> =
         MutableStateFlow(Resource.initial())
     val categoryResponse: MutableStateFlow<Resource<List<String>>> =
         MutableStateFlow(Resource.initial())
@@ -106,8 +114,8 @@ class HomeViewModel : ViewModel() {
 
         viewModelScope.launch {
             questionsResponse.value = Resource.loading()
-            val query = databaseReference.orderByChild("category/name").equalTo(category.value)
-                .limitToFirst(5)
+            val query =
+                databaseReference.orderByChild("category").equalTo(category.value).limitToFirst(5)
 
             if (startAtKey.isNotEmpty()) {
                 query.startAt(startAtKey)
@@ -149,6 +157,36 @@ class HomeViewModel : ViewModel() {
                     // Handle error
                 }
             })
+        }
+    }
+
+
+    lateinit var db: DBDao
+
+    fun setupDb(context: Context) {
+        db = DB(context).dbDao()
+    }
+
+    suspend fun isFav(uuid: String): Boolean {
+        return withContext(Dispatchers.IO) { db.getQuestionByUuid(uuid) != null }
+    }
+
+    suspend fun removeFav(question: Question) {
+        withContext(Dispatchers.IO) {
+
+            db.deleteQuestion(question)
+        }
+    }
+
+    suspend fun addFav(question: Question) {
+        withContext(Dispatchers.IO) {
+            db.insertQuestion(question)
+        }
+    }
+
+    suspend fun getFavorites() {
+        return withContext(Dispatchers.IO) {
+            favResponse.value = Resource.success(db.getAllQuestions())
         }
     }
 }

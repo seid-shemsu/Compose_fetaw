@@ -234,6 +234,7 @@ class MineFragment : Fragment() {
                                 LazyColumn(content = {
                                     items(questions.size) { index ->
                                         MyQuestion(
+                                            context = requireContext(),
                                             question = questions[index]
                                         )
                                     }
